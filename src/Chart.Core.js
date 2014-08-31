@@ -159,8 +159,8 @@
 			// 			with template function
 			templateInterpolators: {
          	start: "<%",
-            end: "%>"
-         },		
+      		end: "%>"
+      },		
 
 			// Function - Will fire on animation progression.
 			onAnimationProgress: function(){},

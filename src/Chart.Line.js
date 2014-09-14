@@ -256,10 +256,10 @@
 			});
 			this.scale.update(newScaleProps);
 		},
-		draw : function(ease){
-			var easingDecimal = ease || 1;
-			this.clear();
 
+		//extracted from draw() so it can be used to draw any line datasets
+		drawDatasets: function(datasets, easingDecimal)
+		{
 			var ctx = this.chart.ctx;
 
 			// Some helper methods for getting the next/prev points
@@ -272,9 +272,6 @@
 			previousPoint = function(point, collection, index){
 				return helpers.findPreviousWhere(collection, hasValue, index) || point;
 			};
-
-			this.scale.draw(easingDecimal);
-
 
 			helpers.each(this.datasets,function(dataset){
 				var pointsWithValues = helpers.where(dataset.points, hasValue);
@@ -371,6 +368,13 @@
 					point.draw();
 				});
 			},this);
+		},
+		draw : function(ease){
+			var easingDecimal = ease || 1;
+			this.clear();
+
+			this.scale.draw(easingDecimal);
+			this.drawDatasets(this.datasets, easingDecimal);
 		}
 	});
 

@@ -3,6 +3,14 @@
 [![Build Status](https://travis-ci.org/nnnick/Chart.js.svg?branch=master)](https://travis-ci.org/nnnick/Chart.js) [![Code Climate](https://codeclimate.com/github/nnnick/Chart.js/badges/gpa.svg)](https://codeclimate.com/github/nnnick/Chart.js)
 
 
+##New Features In My Fork
+ - labelsFilter to filter x-axis labels based on user provided function
+ - Template interpolator can be changed from default `<%` `%>` to what ever you want
+ - New chart - overlay chart - for combing both bar and line charts on the same chart
+ 
+## Documentation
+
+
 *Simple HTML5 Charts using the canvas element* [chartjs.org](http://www.chartjs.org)
 
 ## Documentation
@@ -17,4 +25,6 @@ For support using Chart.js, please post questions with the [`chartjs` tag on Sta
 
 ## License
 
+
 Chart.js is available under the [MIT license](http://opensource.org/licenses/MIT).
+

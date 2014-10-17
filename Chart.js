@@ -931,7 +931,7 @@
                                 yMin;
                             helpers.each(this.datasets, function(dataset) {
                                 dataCollection = dataset.points || dataset.bars || dataset.segments;
-                                if (dataCollection[dataIndex] && dataCollection[dataIndex].hasValue()) {
+                                if (dataCollection[dataIndex] && dataCollection[dataIndex].hasValue() && (dataCollection[dataIndex].showTooltip === undefined || dataCollection[dataIndex].showTooltip)) {
                                     Elements.push(dataCollection[dataIndex]);
                                 }
                             });
@@ -2064,6 +2064,7 @@
                     label: dataset.label || null,
                     fillColor: dataset.fillColor,
                     strokeColor: dataset.strokeColor,
+                    showTooltip: dataset.showTooltip,
                     bars: []
                 };
 
@@ -2073,10 +2074,12 @@
                     //Add a new point for each piece of data, passing any required data to draw.
                     datasetObject.bars.push(new this.BarClass({
                         value: dataPoint,
+                        showTooltip:dataset.showTooltip === undefined?true:dataset.showTooltip,
                         label: data.labels[index],
                         datasetLabel: dataset.label,
                         strokeColor: dataset.strokeColor,
                         fillColor: dataset.fillColor,
+
                         highlightFill: dataset.highlightFill || dataset.fillColor,
                         highlightStroke: dataset.highlightStroke || dataset.strokeColor
                     }));
@@ -2126,7 +2129,7 @@
 
             for (var datasetIndex = 0; datasetIndex < this.datasets.length; datasetIndex++) {
                 for (barIndex = 0; barIndex < this.datasets[datasetIndex].bars.length; barIndex++) {
-                    if (this.datasets[datasetIndex].bars[barIndex].inRange(eventPosition.x, eventPosition.y)) {
+                    if (this.datasets[datasetIndex].bars[barIndex].inRange(eventPosition.x, eventPosition.y)&& this.datasets[datasetIndex].bars[barIndex].showTooltip) {
                         helpers.each(this.datasets, datasetIterator);
                         return barsArray;
                     }
@@ -2547,13 +2550,13 @@
 
 			//Iterate through each of the datasets, and build this into a property of the chart
 			helpers.each(data.datasets,function(dataset){
-
 				var datasetObject = {
 					label : dataset.label || null,
 					fillColor : dataset.fillColor,
 					strokeColor : dataset.strokeColor,
 					pointColor : dataset.pointColor,
 					pointStrokeColor : dataset.pointStrokeColor,
+					showTooltip: dataset.showTooltip,
 					points : []
 				};
 
@@ -2563,8 +2566,10 @@
 				helpers.each(dataset.data,function(dataPoint,index){
 					//Add a new point for each piece of data, passing any required data to draw.
 					datasetObject.points.push(new this.PointClass({
+
 						//if datapoint is null add a flag to ignore this point
 						ignore: dataPoint === null,
+						showTooltip:dataset.showTooltip === undefined?true:dataset.showTooltip,
 						value : dataPoint,
 						label : data.labels[index],
 						datasetLabel: dataset.label,
@@ -2612,7 +2617,7 @@
 				eventPosition = helpers.getRelativePosition(e);
 			helpers.each(this.datasets,function(dataset){
 				helpers.each(dataset.points,function(point){
-					if (point.inRange(eventPosition.x,eventPosition.y)) pointsArray.push(point);
+					if (point.inRange(eventPosition.x,eventPosition.y) && point.showTooltip) pointsArray.push(point);
 				});
 			},this);
 			return pointsArray;
@@ -2936,6 +2941,7 @@
 					bars : [],
 					pointColor : dataset.pointColor,
 					pointStrokeColor : dataset.pointStrokeColor,
+					showTooltip: dataset.showTooltip,
 					points : []
 				};
 
@@ -2948,6 +2954,7 @@
 						//Add a new point for each piece of data, passing any required data to draw.
 						datasetObject.points.push(new this.PointClass({
 							ignore: dataPoint === null,
+							showTooltip:dataset.showTooltip === undefined?true:dataset.showTooltip,
 							value : dataPoint,
 							label : data.labels[index],
 							datasetLabel: dataset.label,
@@ -2966,6 +2973,7 @@
 							datasetObject.bars.push(new this.BarClass({
 								value : dataPoint,
 								label : data.labels[index],
+								showTooltip:dataset.showTooltip === undefined?true:dataset.showTooltip,
 								datasetLabel: dataset.label,
 								strokeColor : dataset.strokeColor,
 								fillColor : dataset.fillColor,
@@ -3044,7 +3052,7 @@
 				eventPosition = helpers.getRelativePosition(e);
 			helpers.each(this.lineDatasets,function(dataset){
 				helpers.each(dataset.points,function(point){
-					if (point.inRange(eventPosition.x,eventPosition.y)) pointsArray.push(point);
+					if (point.inRange(eventPosition.x,eventPosition.y) && point.showTooltip) pointsArray.push(point);
 				});
 			},this);
 			return pointsArray;
@@ -3059,7 +3067,7 @@
 
 			for (var datasetIndex = 0; datasetIndex < this.barDatasets.length; datasetIndex++) {
 				for (barIndex = 0; barIndex < this.barDatasets[datasetIndex].bars.length; barIndex++) {
-					if (this.barDatasets[datasetIndex].bars[barIndex].inRange(eventPosition.x,eventPosition.y)){
+                    if (this.barDatasets[datasetIndex].bars[barIndex].inRange(eventPosition.x, eventPosition.y)&& this.barDatasets[datasetIndex].bars[barIndex].showTooltip) {
 						helpers.each(this.barDatasets, datasetIterator);
 						return barsArray;
 					}
@@ -3146,7 +3154,6 @@
 		showTooltip : function(ChartElements, forceRedraw){
 			// Only redraw the chart if we've actually changed what we're hovering on.
 			if (typeof this.activeElements === 'undefined') this.activeElements = [];
-
 			var isChanged = (function(Elements){
 				var changed = false;
 
@@ -3177,7 +3184,7 @@
 						dataIndex;
 
 					for (var i = this.lineDatasets.length - 1; i >= 0; i--) {
-						dataArray = this.datasets[i].points;
+						dataArray = this.lineDatasets[i].points;
 						dataIndex = helpers.indexOf(dataArray, ChartElements[0]);
 						if (dataIndex !== -1){
 							break;
@@ -3186,7 +3193,7 @@
 					if(dataIndex === -1)
 					{
 						for (i = this.barDatasets.length - 1; i >= 0; i--) {
-							dataArray = this.datasets[i].bars;
+							dataArray = this.barDatasets[i].bars;
 							dataIndex = helpers.indexOf(dataArray, ChartElements[0]);
 							if (dataIndex !== -1){
 								break;
@@ -3208,13 +3215,13 @@
 								yMin;
 							helpers.each(this.lineDatasets, function(dataset){
 								dataCollection = dataset.points;
-								if (dataCollection[dataIndex] && dataCollection[dataIndex].hasValue()){
+								if (dataCollection[dataIndex] && dataCollection[dataIndex].hasValue() && (dataCollection[dataIndex].showTooltip === undefined || dataCollection[dataIndex].showTooltip)){
 									Elements.push(dataCollection[dataIndex]);
 								}
 							});
 							helpers.each(this.barDatasets, function(dataset){
 								dataCollection = dataset.bars;
-								if (dataCollection[dataIndex] && dataCollection[dataIndex].hasValue()){
+								if (dataCollection[dataIndex] && dataCollection[dataIndex].hasValue()  && (dataCollection[dataIndex].showTooltip === undefined || dataCollection[dataIndex].showTooltip)){
 									Elements.push(dataCollection[dataIndex]);
 								}
 							});

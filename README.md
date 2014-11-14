@@ -12,7 +12,7 @@
  - line,bar and overlay charts can have the tooltip display finely tuned. For each dataset an option called showTooltip can be passed to turn off the displaying off tooltips for that one dataset but not the whole chart
  
 
-All new features are all documented the forks docs section.
+All new features are documented the forks docs section.
 ## Documentation
 
 

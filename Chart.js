@@ -2628,7 +2628,9 @@
 			var dataTotal = function(){
 				var values = [];
 				self.eachPoints(function(point){
-					values.push(point.value);
+					if(point.value !==  null){
+					  values.push(point.value);
+				  }
 				});
 
 				return values;

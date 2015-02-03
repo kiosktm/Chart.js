@@ -51,6 +51,9 @@
         //Boolean - Whetther to try and fill sparse datasets to keep one consecutive line
         populateSparseData: false,
 
+         //Number - length of labels being displayed on graph, 0 represents full length
+        labelLength:0,
+
         //String - A legend template
         legendTemplate: "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].strokeColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>"
 
@@ -204,6 +207,7 @@
             };
 
             var scaleOptions = {
+                labelLength:this.options.labelLength,
                 templateString: this.options.scaleLabel,
                 height: this.chart.height,
                 width: this.chart.width,

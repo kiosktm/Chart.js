@@ -40,6 +40,9 @@
         //Boolean - bars are stacked behind each other (smallest at front)
         stacked: false,
 
+        //Number - length of labels being displayed on graph, 0 represents full length
+        labelLength:0,
+
         //String - A legend template
         legendTemplate: "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].fillColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>"
 
@@ -199,6 +202,7 @@
             };
 
             var scaleOptions = {
+                labelLength:this.options.labelLength,
                 labelsFilter: this.options.labelsFilter,
                 templateString: this.options.scaleLabel,
                 height: this.chart.height,

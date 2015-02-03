@@ -153,7 +153,7 @@
             multiTooltipKeyBackground: '#fff',
 
             // Object - Start and End Interpolators to be used with
-            // 			with template function
+            //          with template function
             templateInterpolators: {
                 start: "<%",
                 end: "%>"
@@ -1406,7 +1406,11 @@
 
     Chart.Scale = Chart.Element.extend({
         initialize: function() {
+            this.xLabels = this.labelLength > 0 ? this.xLabels.map(this.truncateLabel, this) : this.xLabels;
             this.fit();
+        },
+        truncateLabel: function(label) {
+            return label.substring(0, this.labelLength);
         },
         buildYLabels: function() {
             this.yLabels = [];
@@ -1421,7 +1425,7 @@
             this.yLabelWidth = (this.display && this.showLabels) ? longestText(this.ctx, this.font, this.yLabels) : 0;
         },
         addXLabel: function(label) {
-            this.xLabels.push(label);
+            this.xLabels.push(this.labelLength > 0 ? this.truncateLabel(label) : label);
             this.valuesCount++;
             this.fit();
         },
@@ -1448,14 +1452,14 @@
 
             // Build the current yLabels so we have an idea of what size they'll be to start
             /*
-			 *	This sets what is returned from calculateScaleRange as static properties of this class:
-			 *
-				this.steps;
-				this.stepValue;
-				this.min;
-				this.max;
-			 *
-			 */
+             *  This sets what is returned from calculateScaleRange as static properties of this class:
+             *
+                this.steps;
+                this.stepValue;
+                this.min;
+                this.max;
+             *
+             */
             this.calculateYRange(cachedHeight);
 
             // With these properties set we can now build the array of yLabels
@@ -2000,6 +2004,9 @@
         //Boolean - bars are stacked behind each other (smallest at front)
         stacked: false,
 
+        //Number - length of labels being displayed on graph, 0 represents full length
+        labelLength:0,
+
         //String - A legend template
         legendTemplate: "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].fillColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>"
 
@@ -2159,6 +2166,7 @@
             };
 
             var scaleOptions = {
+                labelLength:this.options.labelLength,
                 labelsFilter: this.options.labelsFilter,
                 templateString: this.options.scaleLabel,
                 height: this.chart.height,
@@ -2583,6 +2591,9 @@
         //Boolean - Whetther to try and fill sparse datasets to keep one consecutive line
         populateSparseData: false,
 
+         //Number - length of labels being displayed on graph, 0 represents full length
+        labelLength:0,
+
         //String - A legend template
         legendTemplate: "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].strokeColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>"
 
@@ -2736,6 +2747,7 @@
             };
 
             var scaleOptions = {
+                labelLength:this.options.labelLength,
                 templateString: this.options.scaleLabel,
                 height: this.chart.height,
                 width: this.chart.width,
@@ -3213,6 +3225,7 @@
             };
 
             var scaleOptions = {
+                labelLength:this.options.labelLength,
                 labelsFilter: this.options.labelsFilter,
                 templateString: this.options.scaleLabel,
                 height: this.chart.height,

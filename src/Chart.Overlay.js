@@ -188,6 +188,7 @@
             };
 
             var scaleOptions = {
+                labelLength:this.options.labelLength,
                 labelsFilter: this.options.labelsFilter,
                 templateString: this.options.scaleLabel,
                 height: this.chart.height,

@@ -153,7 +153,7 @@
             multiTooltipKeyBackground: '#fff',
 
             // Object - Start and End Interpolators to be used with
-            // 			with template function
+            //          with template function
             templateInterpolators: {
                 start: "<%",
                 end: "%>"
@@ -1406,7 +1406,11 @@
 
     Chart.Scale = Chart.Element.extend({
         initialize: function() {
+            this.xLabels = this.labelLength > 0 ? this.xLabels.map(this.truncateLabel, this) : this.xLabels;
             this.fit();
+        },
+        truncateLabel: function(label) {
+            return label.substring(0, this.labelLength);
         },
         buildYLabels: function() {
             this.yLabels = [];
@@ -1421,7 +1425,7 @@
             this.yLabelWidth = (this.display && this.showLabels) ? longestText(this.ctx, this.font, this.yLabels) : 0;
         },
         addXLabel: function(label) {
-            this.xLabels.push(label);
+            this.xLabels.push(this.labelLength > 0 ? this.truncateLabel(label) : label);
             this.valuesCount++;
             this.fit();
         },
@@ -1448,14 +1452,14 @@
 
             // Build the current yLabels so we have an idea of what size they'll be to start
             /*
-			 *	This sets what is returned from calculateScaleRange as static properties of this class:
-			 *
-				this.steps;
-				this.stepValue;
-				this.min;
-				this.max;
-			 *
-			 */
+             *  This sets what is returned from calculateScaleRange as static properties of this class:
+             *
+                this.steps;
+                this.stepValue;
+                this.min;
+                this.max;
+             *
+             */
             this.calculateYRange(cachedHeight);
 
             // With these properties set we can now build the array of yLabels

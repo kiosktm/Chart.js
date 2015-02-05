@@ -835,7 +835,7 @@
         },
         stop: function() {
             // Stops any current animation loop occuring
-            helpers.cancelAnimFrame.call(root, this.animationFrame);
+            helpers.cancelAnimFrame(this.animationFrame);
             return this;
         },
         resize: function(callback) {
@@ -880,6 +880,20 @@
         destroy: function() {
             this.clear();
             unbindEvents(this, this.events);
+            var canvas = this.chart.canvas;
+
+            // Reset canvas height/width attributes starts a fresh with the canvas context
+            canvas.width = this.chart.width;
+            canvas.height = this.chart.height;
+
+            // < IE9 doesn't support removeProperty
+            if (canvas.style.removeProperty) {
+                canvas.style.removeProperty('width');
+                canvas.style.removeProperty('height');
+            } else {
+                canvas.style.removeAttribute('width');
+                canvas.style.removeAttribute('height');
+            }
             delete Chart.instances[this.id];
         },
         showTooltip: function(ChartElements, forceRedraw) {

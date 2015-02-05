@@ -1,10 +1,9 @@
-
 /*!
  * Chart.js
  * http://chartjs.org/
- * Version: 1.0.1-beta.4
+ * Version: 1.0.1
  *
- * Copyright 2014 Nick Downie
+ * Copyright 2015 Nick Downie
  * Released under the MIT license
  * https://github.com/nnnick/Chart.js/blob/master/LICENSE.md
  */
@@ -93,14 +92,20 @@
             // Boolean - whether or not the chart should be responsive and resize when the browser does.
             responsive: false,
 
+
             // Boolean - whether to maintain the starting aspect ratio or not when responsive, if set to false, will take up entire container
             maintainAspectRatio: true,
 
             // Boolean - Determines whether to draw tooltips on the canvas or not - attaches events to touchmove & mousemove
             showTooltips: true,
 
+
+            // Boolean - Determines whether to draw built-in tooltip or call custom tooltip function
+            customTooltips: false,
+
             // Array - Array of string names to attach tooltip events
             tooltipEvents: ["mousemove", "touchstart", "touchmove", "mouseout"],
+
 
             // String - Tooltip background colour
             tooltipFillColor: "rgba(0,0,0,0.8)",
@@ -903,6 +908,9 @@
                 this.activeElements = ChartElements;
             }
             this.draw();
+            if (this.options.customTooltips) {
+                this.options.customTooltips(false);
+            }
             if (ChartElements.length > 0) {
                 // If we have multiple datasets, show a MultiTooltip for all of the data points at that index
                 if (this.datasets && this.datasets.length > 1) {
@@ -983,7 +991,8 @@
                         legendColorBackground: this.options.multiTooltipKeyBackground,
                         title: ChartElements[0].label,
                         chart: this.chart,
-                        ctx: this.chart.ctx
+                        ctx: this.chart.ctx,
+                        custom: this.options.customTooltips
                     }).draw();
 
                 } else {
@@ -1002,7 +1011,8 @@
                             caretHeight: this.options.tooltipCaretSize,
                             cornerRadius: this.options.tooltipCornerRadius,
                             text: helpers.template(this.options.tooltipTemplate, Element),
-                            chart: this.chart
+                            chart: this.chart,
+                            custom: this.options.customTooltips
                         }).draw();
                     }, this);
                 }
@@ -1279,46 +1289,49 @@
                 tooltipY = this.y - tooltipHeight;
 
             ctx.fillStyle = this.fillColor;
+            if (this.custom) {
+                this.custom(this);
+            } else {
+                switch (this.yAlign) {
+                    case "above":
+                        //Draw a caret above the x/y
+                        ctx.beginPath();
+                        ctx.moveTo(this.x, this.y - caretPadding);
+                        ctx.lineTo(this.x + this.caretHeight, this.y - (caretPadding + this.caretHeight));
+                        ctx.lineTo(this.x - this.caretHeight, this.y - (caretPadding + this.caretHeight));
+                        ctx.closePath();
+                        ctx.fill();
+                        break;
+                    case "below":
+                        tooltipY = this.y + caretPadding + this.caretHeight;
+                        //Draw a caret below the x/y
+                        ctx.beginPath();
+                        ctx.moveTo(this.x, this.y + caretPadding);
+                        ctx.lineTo(this.x + this.caretHeight, this.y + caretPadding + this.caretHeight);
+                        ctx.lineTo(this.x - this.caretHeight, this.y + caretPadding + this.caretHeight);
+                        ctx.closePath();
+                        ctx.fill();
+                        break;
+                }
 
-            switch (this.yAlign) {
-                case "above":
-                    //Draw a caret above the x/y
-                    ctx.beginPath();
-                    ctx.moveTo(this.x, this.y - caretPadding);
-                    ctx.lineTo(this.x + this.caretHeight, this.y - (caretPadding + this.caretHeight));
-                    ctx.lineTo(this.x - this.caretHeight, this.y - (caretPadding + this.caretHeight));
-                    ctx.closePath();
-                    ctx.fill();
-                    break;
-                case "below":
-                    tooltipY = this.y + caretPadding + this.caretHeight;
-                    //Draw a caret below the x/y
-                    ctx.beginPath();
-                    ctx.moveTo(this.x, this.y + caretPadding);
-                    ctx.lineTo(this.x + this.caretHeight, this.y + caretPadding + this.caretHeight);
-                    ctx.lineTo(this.x - this.caretHeight, this.y + caretPadding + this.caretHeight);
-                    ctx.closePath();
-                    ctx.fill();
-                    break;
+                switch (this.xAlign) {
+                    case "left":
+                        tooltipX = this.x - tooltipWidth + (this.cornerRadius + this.caretHeight);
+                        break;
+                    case "right":
+                        tooltipX = this.x - (this.cornerRadius + this.caretHeight);
+                        break;
+                }
+
+                drawRoundedRectangle(ctx, tooltipX, tooltipY, tooltipWidth, tooltipRectHeight, this.cornerRadius);
+
+                ctx.fill();
+
+                ctx.fillStyle = this.textColor;
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText(this.text, tooltipX + tooltipWidth / 2, tooltipY + tooltipRectHeight / 2);
             }
-
-            switch (this.xAlign) {
-                case "left":
-                    tooltipX = this.x - tooltipWidth + (this.cornerRadius + this.caretHeight);
-                    break;
-                case "right":
-                    tooltipX = this.x - (this.cornerRadius + this.caretHeight);
-                    break;
-            }
-
-            drawRoundedRectangle(ctx, tooltipX, tooltipY, tooltipWidth, tooltipRectHeight, this.cornerRadius);
-
-            ctx.fill();
-
-            ctx.fillStyle = this.textColor;
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.fillText(this.text, tooltipX + tooltipWidth / 2, tooltipY + tooltipRectHeight / 2);
         }
     });
 
@@ -1372,36 +1385,41 @@
 
         },
         draw: function() {
-            drawRoundedRectangle(this.ctx, this.x, this.y - this.height / 2, this.width, this.height, this.cornerRadius);
-            var ctx = this.ctx;
-            ctx.fillStyle = this.fillColor;
-            ctx.fill();
-            ctx.closePath();
+            // Custom Tooltips
+            if (this.custom) {
+                this.custom(this);
+            } else {
+                drawRoundedRectangle(this.ctx, this.x, this.y - this.height / 2, this.width, this.height, this.cornerRadius);
+                var ctx = this.ctx;
+                ctx.fillStyle = this.fillColor;
+                ctx.fill();
+                ctx.closePath();
 
-            ctx.textAlign = "left";
-            ctx.textBaseline = "middle";
-            ctx.fillStyle = this.titleTextColor;
-            ctx.font = this.titleFont;
+                ctx.textAlign = "left";
+                ctx.textBaseline = "middle";
+                ctx.fillStyle = this.titleTextColor;
+                ctx.font = this.titleFont;
 
-            ctx.fillText(this.title, this.x + this.xPadding, this.getLineHeight(0));
+                ctx.fillText(this.title, this.x + this.xPadding, this.getLineHeight(0));
 
-            ctx.font = this.font;
-            helpers.each(this.labels, function(label, index) {
-                ctx.fillStyle = this.textColor;
-                ctx.fillText(label, this.x + this.xPadding + this.fontSize + 3, this.getLineHeight(index + 1));
+                ctx.font = this.font;
+                helpers.each(this.labels, function(label, index) {
+                    ctx.fillStyle = this.textColor;
+                    ctx.fillText(label, this.x + this.xPadding + this.fontSize + 3, this.getLineHeight(index + 1));
 
-                //A bit gnarly, but clearing this rectangle breaks when using explorercanvas (clears whole canvas)
-                //ctx.clearRect(this.x + this.xPadding, this.getLineHeight(index + 1) - this.fontSize/2, this.fontSize, this.fontSize);
-                //Instead we'll make a white filled block to put the legendColour palette over.
+                    //A bit gnarly, but clearing this rectangle breaks when using explorercanvas (clears whole canvas)
+                    //ctx.clearRect(this.x + this.xPadding, this.getLineHeight(index + 1) - this.fontSize/2, this.fontSize, this.fontSize);
+                    //Instead we'll make a white filled block to put the legendColour palette over.
 
-                ctx.fillStyle = this.legendColorBackground;
-                ctx.fillRect(this.x + this.xPadding, this.getLineHeight(index + 1) - this.fontSize / 2, this.fontSize, this.fontSize);
+                    ctx.fillStyle = this.legendColorBackground;
+                    ctx.fillRect(this.x + this.xPadding, this.getLineHeight(index + 1) - this.fontSize / 2, this.fontSize, this.fontSize);
 
-                ctx.fillStyle = this.legendColors[index].fill;
-                ctx.fillRect(this.x + this.xPadding, this.getLineHeight(index + 1) - this.fontSize / 2, this.fontSize, this.fontSize);
+                    ctx.fillStyle = this.legendColors[index].fill;
+                    ctx.fillRect(this.x + this.xPadding, this.getLineHeight(index + 1) - this.fontSize / 2, this.fontSize, this.fontSize);
 
 
-            }, this);
+                }, this);
+            }
         }
     });
 
@@ -1453,6 +1471,7 @@
 
             // Build the current yLabels so we have an idea of what size they'll be to start
             /*
+
              *  This sets what is returned from calculateScaleRange as static properties of this class:
              *
                 this.steps;
@@ -2344,7 +2363,6 @@
         }
     });
 
-
 }).call(this);
 
 (function(){
@@ -2465,12 +2483,12 @@
 			}
 		},
 		calculateCircumference : function(value){
-			return (Math.PI*2)*(value / this.total);
+			return (Math.PI*2)*(Math.abs(value) / this.total);
 		},
 		calculateTotal : function(data){
 			this.total = 0;
 			helpers.each(data,function(segment){
-				this.total += segment.value;
+				this.total += Math.abs(segment.value);
 			},this);
 			this.total = this.total/this.options.scale;
 		},
@@ -3755,6 +3773,8 @@
 			helpers.each(this.segments,function(segment){
 				segment.save();
 			});
+			
+			this.reflow();
 			this.render();
 		},
 		reflow : function(){

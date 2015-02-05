@@ -987,7 +987,7 @@
                     }).draw();
 
                 } else {
-                    each(ChartElements, function(Element) {
+                    helpers.each(ChartElements, function(Element) {
                         var tooltipPosition = Element.tooltipPosition();
                         new Chart.Tooltip({
                             x: Math.round(tooltipPosition.x),
@@ -1001,7 +1001,7 @@
                             fontSize: this.options.tooltipFontSize,
                             caretHeight: this.options.tooltipCaretSize,
                             cornerRadius: this.options.tooltipCornerRadius,
-                            text: template(this.options.tooltipTemplate, Element),
+                            text: helpers.template(this.options.tooltipTemplate, Element),
                             chart: this.chart
                         }).draw();
                     }, this);
@@ -2002,8 +2002,8 @@
         //Number - Spacing between data sets within X values
         barDatasetSpacing: 1,
 
-        //Boolean - bars are stacked behind each other (smallest at front)
-        stacked: false,
+        //Boolean - bars are overlayed behind each other (smallest at front)
+        overlayBars: false,
 
         //Number - length of labels being displayed on graph, 0 represents full length
         labelLength:0,
@@ -2023,23 +2023,23 @@
             var options = this.options;
             this.ScaleClass = Chart.Scale.extend({
                 offsetGridLines: true,
-                calculateBarX: function(datasetCount, datasetIndex, barIndex, stacked) {
+                calculateBarX: function(datasetCount, datasetIndex, barIndex, overlayBars) {
 
-                    if (stacked) {
+                    if (overlayBars) {
                         datasetIndex = 0;
                     }
                     //Reusable method for calculating the xPosition of a given bar based on datasetIndex & width of the bar
                     var xWidth = this.calculateBaseWidth(),
                         xAbsolute = this.calculateX(barIndex) - (xWidth / 2),
-                        barWidth = this.calculateBarWidth(datasetCount, stacked);
+                        barWidth = this.calculateBarWidth(datasetCount, overlayBars);
 
                     return xAbsolute + (barWidth * datasetIndex) + (datasetIndex * options.barDatasetSpacing) + barWidth / 2;
                 },
                 calculateBaseWidth: function() {
                     return (this.calculateX(1) - this.calculateX(0)) - (2 * options.barValueSpacing);
                 },
-                calculateBarWidth: function(datasetCount, stacked) {
-                    if (stacked) {
+                calculateBarWidth: function(datasetCount, overlayBars) {
+                    if (overlayBars) {
                         datasetCount = 1;
                     }
                     //The padding between datasets is to the right of each bar, providing that there are more than 1 dataset
@@ -2110,8 +2110,8 @@
 
             this.eachBars(function(bar, index, datasetIndex) {
                 helpers.extend(bar, {
-                    width: this.scale.calculateBarWidth(this.datasets.length, this.options.stacked),
-                    x: this.scale.calculateBarX(this.datasets.length, datasetIndex, index, this.options.stacked),
+                    width: this.scale.calculateBarWidth(this.datasets.length, this.options.overlayBars),
+                    x: this.scale.calculateBarX(this.datasets.length, datasetIndex, index, this.options.overlayBars),
                     y: this.scale.endPoint
                 });
                 bar.save();
@@ -2220,9 +2220,9 @@
                 this.datasets[datasetIndex].bars.push(new this.BarClass({
                     value: value,
                     label: label,
-                    x: this.scale.calculateBarX(this.datasets.length, datasetIndex, this.scale.valuesCount + 1, this.options.stacked),
+                    x: this.scale.calculateBarX(this.datasets.length, datasetIndex, this.scale.valuesCount + 1, this.options.overlayBars),
                     y: this.scale.endPoint,
-                    width: this.scale.calculateBarWidth(this.datasets.length, this.options.stacked),
+                    width: this.scale.calculateBarWidth(this.datasets.length, this.options.overlayBars),
                     base: this.scale.endPoint,
                     strokeColor: this.datasets[datasetIndex].strokeColor,
                     fillColor: this.datasets[datasetIndex].fillColor
@@ -2268,7 +2268,7 @@
         //extracted from draw so it can be used to draw any bar datasets
         drawDatasets: function(datasets, easingDecimal) {
 
-            if (this.options.stacked && datasets[0]) {
+            if (this.options.overlayBars && datasets[0]) {
 
                 //go through each data set and sort in order of value size
 
@@ -2290,9 +2290,9 @@
                             bar.base = this.scale.endPoint;
                             //Transition then draw
                             bar.transition({
-                                x: this.scale.calculateBarX(datasets.length, datasetIndex, index, this.options.stacked),
+                                x: this.scale.calculateBarX(datasets.length, datasetIndex, index, this.options.overlayBars),
                                 y: this.scale.calculateY(bar.value),
-                                width: this.scale.calculateBarWidth(datasets.length, this.options.stacked)
+                                width: this.scale.calculateBarWidth(datasets.length, this.options.overlayBars)
                             }, easingDecimal).draw();
                         }
                         var objectIndex = helpers.indexOf(drawBucket, bucketInfo);
@@ -2320,9 +2320,9 @@
                             bar.base = this.scale.endPoint;
                             //Transition then draw
                             bar.transition({
-                                x: this.scale.calculateBarX(datasets.length, datasetIndex, index, this.options.stacked),
+                                x: this.scale.calculateBarX(datasets.length, datasetIndex, index, this.options.overlayBars),
                                 y: this.scale.calculateY(bar.value),
-                                width: this.scale.calculateBarWidth(datasets.length, this.options.stacked)
+                                width: this.scale.calculateBarWidth(datasets.length, this.options.overlayBars)
                             }, easingDecimal).draw();
                         }
                     }, this);
@@ -3060,23 +3060,23 @@
             //generate the scale, let bar take control here as he needs the width.
            this.ScaleClass = Chart.Scale.extend({
                 offsetGridLines: true,
-                calculateBarX: function(datasetCount, datasetIndex, barIndex, stacked) {
+                calculateBarX: function(datasetCount, datasetIndex, barIndex, overlayBars) {
 
-                    if (stacked) {
+                    if (overlayBars) {
                         datasetIndex = 0;
                     }
                     //Reusable method for calculating the xPosition of a given bar based on datasetIndex & width of the bar
                     var xWidth = this.calculateBaseWidth(),
                         xAbsolute = this.calculateX(barIndex) - (xWidth / 2),
-                        barWidth = this.calculateBarWidth(datasetCount, stacked);
+                        barWidth = this.calculateBarWidth(datasetCount, overlayBars);
 
                     return xAbsolute + (barWidth * datasetIndex) + (datasetIndex * options.barDatasetSpacing) + barWidth / 2;
                 },
                 calculateBaseWidth: function() {
                     return (this.calculateX(1) - this.calculateX(0)) - (2 * options.barValueSpacing);
                 },
-                calculateBarWidth: function(datasetCount, stacked) {
-                    if (stacked) {
+                calculateBarWidth: function(datasetCount, overlayBars) {
+                    if (overlayBars) {
                         datasetCount = 1;
                     }
                     //The padding between datasets is to the right of each bar, providing that there are more than 1 dataset
@@ -3198,8 +3198,8 @@
             this.BarClass.prototype.base = this.scale.endPoint;
             this.eachBars(function(bar, index, datasetIndex) {
                 helpers.extend(bar, {
-                    width: this.scale.calculateBarWidth(this.barDatasets.length,this.options.stacked),
-                    x: this.scale.calculateBarX(this.barDatasets.length, datasetIndex, index,this.options.stacked),
+                    width: this.scale.calculateBarWidth(this.barDatasets.length,this.options.overlayBars),
+                    x: this.scale.calculateBarX(this.barDatasets.length, datasetIndex, index,this.options.overlayBars),
                     y: this.scale.endPoint
                 });
                 bar.save();

@@ -55,7 +55,7 @@
     window.onload = function() {
         window.myOverlayChart = new Chart(document.getElementById("canvas").getContext("2d")).Overlay(overlayData, {
             populateSparseData: true,
-            stacked: true,
+            overlayBars: true,
             datasetFill: false,
             labelLength: 1,
 

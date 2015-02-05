@@ -1268,7 +1268,7 @@
             this.yAlign = "above";
 
             //Distance between the actual element.y position and the start of the tooltip caret
-            var caretPadding = 2;
+            var caretPadding = this.caretPadding = 2;
 
             var tooltipWidth = ctx.measureText(this.text).width + 2 * this.xPadding,
                 tooltipRectHeight = this.fontSize + 2 * this.yPadding,

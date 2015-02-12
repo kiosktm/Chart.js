@@ -1264,7 +1264,7 @@
                 return this.base - this.y;
             },
             inRange: function(chartX, chartY) {
-                return (chartX >= this.x - this.width / 2 && chartX <= this.x + this.width / 2) && (chartY >= this.y && chartY <= this.base);
+                return (chartX >= this.x - this.width / 2 && chartX <= this.x + this.width / 2) && (chartY >= this.y && (chartY <= this.base || chartY > this.base));
             }
         });
 
@@ -3390,7 +3390,6 @@
                     barsArray.push(dataset.bars[barIndex]);
                 },
                 barIndex;
-
             for (var datasetIndex = 0; datasetIndex < this.barDatasets.length; datasetIndex++) {
                 for (barIndex = 0; barIndex < this.barDatasets[datasetIndex].bars.length; barIndex++) {
                     if (this.barDatasets[datasetIndex].bars[barIndex].inRange(eventPosition.x, eventPosition.y) && this.barDatasets[datasetIndex].bars[barIndex].showTooltip) {

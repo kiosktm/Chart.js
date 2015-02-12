@@ -287,7 +287,6 @@
                     barsArray.push(dataset.bars[barIndex]);
                 },
                 barIndex;
-
             for (var datasetIndex = 0; datasetIndex < this.barDatasets.length; datasetIndex++) {
                 for (barIndex = 0; barIndex < this.barDatasets[datasetIndex].bars.length; barIndex++) {
                     if (this.barDatasets[datasetIndex].bars[barIndex].inRange(eventPosition.x, eventPosition.y) && this.barDatasets[datasetIndex].bars[barIndex].showTooltip) {

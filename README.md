@@ -6,6 +6,7 @@
 *Simple HTML5 Charts using the canvas element* [chartjs.org](http://www.chartjs.org)
 ##Changes
  - Bar chart tool-tip will show when hovering labels as well as data (this was the norm for line charts so just brought the two in-line)
+
 ##New Features In This Fork
  - labelsFilter to filter x-axis labels based on user provided function [http://jsfiddle.net/leighking2/mea767ss](http://jsfiddle.net/leighking2/mea767ss/)
  - Template interpolator can be changed from default `<%` `%>` to what ever you want [http://jsfiddle.net/leighking2/d5yq9x32](http://fiddle.jshell.net/leighking2/d5yq9x32/)

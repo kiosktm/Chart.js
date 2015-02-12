@@ -47,7 +47,7 @@
         overlayBars: false,
 
         //Number - length of labels being displayed on graph, 0 represents full length
-        labelLength:0,
+        labelLength: 0,
 
         //String - A legend template
         legendTemplate: "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].fillColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>"
@@ -101,8 +101,10 @@
                         bar.restore(['fillColor', 'strokeColor']);
                     });
                     helpers.each(activeBars, function(activeBar) {
-                        activeBar.fillColor = activeBar.highlightFill;
-                        activeBar.strokeColor = activeBar.highlightStroke;
+                        if (activeBar) {
+                            activeBar.fillColor = activeBar.highlightFill;
+                            activeBar.strokeColor = activeBar.highlightStroke;
+                        }
                     });
                     this.showTooltip(activeBars);
                 });
@@ -208,7 +210,7 @@
             };
 
             var scaleOptions = {
-                labelLength:this.options.labelLength,
+                labelLength: this.options.labelLength,
                 labelsFilter: this.options.labelsFilter,
                 templateString: this.options.scaleLabel,
                 height: this.chart.height,
@@ -235,8 +237,8 @@
                 font: helpers.fontString(this.options.scaleFontSize, this.options.scaleFontStyle, this.options.scaleFontFamily),
                 lineWidth: this.options.scaleLineWidth,
                 lineColor: this.options.scaleLineColor,
-                showHorizontalLines : this.options.scaleShowHorizontalLines,
-                showVerticalLines : this.options.scaleShowVerticalLines,
+                showHorizontalLines: this.options.scaleShowHorizontalLines,
+                showVerticalLines: this.options.scaleShowVerticalLines,
                 gridLineWidth: (this.options.scaleShowGridLines) ? this.options.scaleGridLineWidth : 0,
                 gridLineColor: (this.options.scaleShowGridLines) ? this.options.scaleGridLineColor : "rgba(0,0,0,0)",
                 padding: (this.options.showScale) ? 0 : (this.options.barShowStroke) ? this.options.barStrokeWidth : 0,
@@ -318,15 +320,17 @@
                 for (var index = 0; index < datasets[0].bars.length; index++) {
                     var drawBucket = [];
                     for (var datasetIndex = 0; datasetIndex < datasets.length; datasetIndex++) {
-                        var value = datasets[datasetIndex].bars[index].value;
-                        drawBucket.push({
-                            value: value,
-                            index: index,
-                            datasetIndex: datasetIndex
-                        });
+                        if (datasets[datasetIndex].bars[index]) {
+                            var value = datasets[datasetIndex].bars[index].value;
+                            drawBucket.push({
+                                value: value,
+                                index: index,
+                                datasetIndex: datasetIndex
+                            });
+                        }
                     }
 
-                    while (drawBucket.length > 0 ) {
+                    while (drawBucket.length > 0) {
                         var bucketInfo = this.getLargestValue(drawBucket);
                         var bar = datasets[bucketInfo.datasetIndex].bars[bucketInfo.index];
                         if (bar.hasValue()) {
@@ -340,11 +344,10 @@
                         }
                         var objectIndex = helpers.indexOf(drawBucket, bucketInfo);
                         if (objectIndex === 0) {
-                            if (drawBucket.length === 1)
-                            {
+                            if (drawBucket.length === 1) {
                                 drawBucket = [];
-                            }else{
-                                drawBucket = drawBucket.slice((drawBucket.length * -1) +1);
+                            } else {
+                                drawBucket = drawBucket.slice((drawBucket.length * -1) + 1);
 
                             }
                         } else {

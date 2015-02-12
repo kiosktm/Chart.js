@@ -20,7 +20,7 @@
             this.lineDatasets = [];
 
             //generate the scale, let bar take control here as he needs the width.
-           this.ScaleClass = Chart.Scale.extend({
+            this.ScaleClass = Chart.Scale.extend({
                 offsetGridLines: true,
                 calculateBarX: function(datasetCount, datasetIndex, barIndex, overlayBars) {
 
@@ -74,8 +74,10 @@
                         point.restore(['fillColor', 'strokeColor']);
                     });
                     helpers.each(activeData, function(active) {
-                        active.fillColor = active.highlightFill;
-                        active.strokeColor = active.highlightStroke;
+                        if (active) {
+                            active.fillColor = active.highlightFill;
+                            active.strokeColor = active.highlightStroke;
+                        }
                     });
                     this.showTooltip(activeData);
                 });
@@ -161,8 +163,8 @@
             this.BarClass.prototype.base = this.scale.endPoint;
             this.eachBars(function(bar, index, datasetIndex) {
                 helpers.extend(bar, {
-                    width: this.scale.calculateBarWidth(this.barDatasets.length,this.options.overlayBars),
-                    x: this.scale.calculateBarX(this.barDatasets.length, datasetIndex, index,this.options.overlayBars),
+                    width: this.scale.calculateBarWidth(this.barDatasets.length, this.options.overlayBars),
+                    x: this.scale.calculateBarX(this.barDatasets.length, datasetIndex, index, this.options.overlayBars),
                     y: this.scale.endPoint
                 });
                 bar.save();
@@ -189,7 +191,7 @@
             };
 
             var scaleOptions = {
-                labelLength:this.options.labelLength,
+                labelLength: this.options.labelLength,
                 labelsFilter: this.options.labelsFilter,
                 templateString: this.options.scaleLabel,
                 height: this.chart.height,
@@ -218,8 +220,8 @@
                 lineColor: this.options.scaleLineColor,
                 gridLineWidth: (this.options.scaleShowGridLines) ? this.options.scaleGridLineWidth : 0,
                 gridLineColor: (this.options.scaleShowGridLines) ? this.options.scaleGridLineColor : "rgba(0,0,0,0)",
-                showHorizontalLines : this.options.scaleShowHorizontalLines,
-                showVerticalLines : this.options.scaleShowVerticalLines,
+                showHorizontalLines: this.options.scaleShowHorizontalLines,
+                showVerticalLines: this.options.scaleShowVerticalLines,
                 padding: (this.options.showScale) ? 0 : (this.options.barShowStroke) ? this.options.barStrokeWidth : 0,
                 showLabels: this.options.scaleShowLabels,
                 display: this.options.showScale
@@ -396,9 +398,9 @@
                 this.activeElements = ChartElements;
             }
             this.draw();
-             if (this.options.customTooltips) {
-                    this.options.customTooltips(false);
-                }
+            if (this.options.customTooltips) {
+                this.options.customTooltips(false);
+            }
             if (ChartElements.length > 0) {
                 // If we have multiple datasets, show a MultiTooltip for all of the data points at that index
                 if (this.datasets && this.datasets.length > 1) {

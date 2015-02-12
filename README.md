@@ -1,9 +1,11 @@
 # Chart.js 
 
-[![Build Status](https://travis-ci.org/nnnick/Chart.js.svg?branch=master)](https://travis-ci.org/nnnick/Chart.js) [![Code Climate](https://codeclimate.com/github/nnnick/Chart.js/badges/gpa.svg)](https://codeclimate.com/github/nnnick/Chart.js)
+[![Build Status](https://travis-ci.org/nnnick/Chart.js.svg?branch=master)](https://travis-ci.org/nnnick/Chart.js) [![Code Climate](https://codeclimate.com/github/leighquince/Chart.js/badges/gpa.svg)](https://codeclimate.com/github/leighquince/Chart.js)
 
 
 *Simple HTML5 Charts using the canvas element* [chartjs.org](http://www.chartjs.org)
+##Changes
+ - Bar chart tool-tip will show when hovering labels as well as data (this was the norm for line charts so just brought the two in-line)
 
 ##New Features In This Fork
  - labelsFilter to filter x-axis labels based on user provided function [http://jsfiddle.net/leighking2/mea767ss](http://jsfiddle.net/leighking2/mea767ss/)

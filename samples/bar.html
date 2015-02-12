@@ -46,6 +46,8 @@
 		var ctx = document.getElementById("canvas").getContext("2d");
 		window.myBar = new Chart(ctx).Bar(barChartData, {
 			overlayBars : true,
+			scaleShowVerticalLines: false,
+            labelLength: 1,
 		});
 	}
 

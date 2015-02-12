@@ -66,6 +66,7 @@
             if (this.options.showTooltips) {
                 helpers.bindEvents(this, this.options.tooltipEvents, function(evt) {
                     var activeData = (evt.type !== 'mouseout') ? this.getDataAtEvent(evt) : [];
+
                     this.eachBars(function(bar) {
                         bar.restore(['fillColor', 'strokeColor']);
                     });
@@ -396,6 +397,9 @@
                 this.activeElements = ChartElements;
             }
             this.draw();
+             if (this.options.customTooltips) {
+                    this.options.customTooltips(false);
+                }
             if (ChartElements.length > 0) {
                 // If we have multiple datasets, show a MultiTooltip for all of the data points at that index
                 if (this.datasets && this.datasets.length > 1) {
@@ -409,7 +413,7 @@
                             break;
                         }
                     }
-                    if (dataIndex === -1) {
+                    if (dataIndex === -1 || dataIndex === undefined) {
                         for (i = this.barDatasets.length - 1; i >= 0; i--) {
                             dataArray = this.barDatasets[i].bars;
                             dataIndex = helpers.indexOf(dataArray, ChartElements[0]);
@@ -443,7 +447,6 @@
                                     Elements.push(dataCollection[dataIndex]);
                                 }
                             });
-
                             helpers.each(Elements, function(element) {
                                 xPositions.push(element.x);
                                 yPositions.push(element.y);
@@ -491,7 +494,8 @@
                         legendColorBackground: this.options.multiTooltipKeyBackground,
                         title: ChartElements[0].label,
                         chart: this.chart,
-                        ctx: this.chart.ctx
+                        ctx: this.chart.ctx,
+                        custom: this.options.customTooltips
                     }).draw();
 
                 } else {
@@ -510,7 +514,8 @@
                             caretHeight: this.options.tooltipCaretSize,
                             cornerRadius: this.options.tooltipCornerRadius,
                             text: helpers.template(this.options.tooltipTemplate, Element),
-                            chart: this.chart
+                            chart: this.chart,
+                            custom: this.options.customTooltips
                         }).draw();
                     }, this);
                 }

@@ -18,7 +18,7 @@
  - line (and overlay) chart can have an option passed to populate sparse data sets. When this is passed the chart will connect any blank values in the chart so that the line is continous (starts at the first data poitn entered and goes untill the last data point), just pass the option `populateSparseData:true` when creating the chart. [http://jsfiddle.net/leighking2/uhs6rbt8/](http://jsfiddle.net/leighking2/uhs6rbt8/)
  - line,bar and overlay charts have a new option called `labelLength`. This is a number,which if greater than 0, will trim x-axis labels to a specific length [http://fiddle.jshell.net/leighking2/vepoxa54/](http://fiddle.jshell.net/leighking2/vepoxa54/)
 
-All new features are documented in the forks docs section or follow the links to the fiddles to see a working example.
+Most new features are documented in the forks docs section or follow the links to the fiddles to see a working example.
 ## Documentation
 
 You can find documentation at [chartjs.org/docs](http://www.chartjs.org/docs/). The markdown files that build the site are available under `/docs`. Please note - in some of the json examples of configuration you might notice some liquid tags - this is just for the generating the site html, please disregard.

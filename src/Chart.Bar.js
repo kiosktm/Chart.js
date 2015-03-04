@@ -16,6 +16,9 @@
         //Boolean - Whether the scale should start at zero, or an order of magnitude down from the lowest value
         scaleBeginAtZero: true,
 
+        //Boolean - Whether the bars should start at the origin, or the bottom of the scale.
+        barBeginAtOrigin: true,
+
         //Boolean - Whether grid lines are shown across the chart
         scaleShowGridLines: true,
 
@@ -148,14 +151,21 @@
             }, this);
 
             this.buildScale(data.labels);
-
-            this.BarClass.prototype.base = this.scale.endPoint;
+            if (this.options.barBeginAtOrigin && this.scale.min < 0) {
+                this.BarClass.prototype.base = (-1 * parseFloat(this.scale.min) /
+                ((this.scale.max - this.scale.min) * 1.00) *
+                (this.scale.endPoint - this.scale.startPoint) +
+                this.scale.startPoint);
+            }
+            else {
+                this.BarClass.prototype.base = this.scale.endPoint;
+            }
 
             this.eachBars(function(bar, index, datasetIndex) {
                 helpers.extend(bar, {
                     width: this.scale.calculateBarWidth(this.datasets.length, this.options.overlayBars),
                     x: this.scale.calculateBarX(this.datasets.length, datasetIndex, index, this.options.overlayBars),
-                    y: this.scale.endPoint
+                    y: bar.base
                 });
                 bar.save();
             }, this);
@@ -189,7 +199,7 @@
 
             for (var datasetIndex = 0; datasetIndex < this.datasets.length; datasetIndex++) {
                 for (barIndex = 0; barIndex < this.datasets[datasetIndex].bars.length; barIndex++) {
-                    if (this.datasets[datasetIndex].bars[barIndex].inRange(eventPosition.x, eventPosition.y) && this.datasets[datasetIndex].bars[barIndex].showTooltip) {
+                    if (this.datasets[datasetIndex].bars[barIndex].inRange(eventPosition.x, eventPosition.y, this.scale.endPoint) && this.datasets[datasetIndex].bars[barIndex].showTooltip) {
                         helpers.each(this.datasets, datasetIterator);
                         return barsArray;
                     }
@@ -222,6 +232,7 @@
                 fontFamily: this.options.scaleFontFamily,
                 valuesCount: labels.length,
                 beginAtZero: this.options.scaleBeginAtZero,
+                beginAtOrigin : this.options.barBeginAtOrigin,
                 integersOnly: this.options.scaleIntegersOnly,
                 calculateYRange: function(currentHeight) {
                     var updatedRanges = helpers.calculateScaleRange(
@@ -334,7 +345,12 @@
                         var bucketInfo = this.getLargestValue(drawBucket);
                         var bar = datasets[bucketInfo.datasetIndex].bars[bucketInfo.index];
                         if (bar.hasValue()) {
-                            bar.base = this.scale.endPoint;
+                           if (this.options.barBeginAtOrigin && this.scale.min < 0) {
+                                helpers.noop();
+                            }
+                            else {
+                                bar.base = this.scale.endPoint;
+                            }
                             //Transition then draw
                             bar.transition({
                                 x: this.scale.calculateBarX(datasets.length, datasetIndex, index, this.options.overlayBars),
@@ -363,7 +379,12 @@
                 helpers.each(datasets, function(dataset, datasetIndex) {
                     helpers.each(dataset.bars, function(bar, index) {
                         if (bar.hasValue()) {
-                            bar.base = this.scale.endPoint;
+                            if (this.options.barBeginAtOrigin && this.scale.min < 0) {
+                                helpers.noop();
+                            }
+                            else {
+                                bar.base = this.scale.endPoint;
+                            }
                             //Transition then draw
                             bar.transition({
                                 x: this.scale.calculateBarX(datasets.length, datasetIndex, index, this.options.overlayBars),

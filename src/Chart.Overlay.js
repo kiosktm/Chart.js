@@ -148,7 +148,7 @@
             }, this);
 
             this.buildScale(data.labels);
-
+            
             helpers.each(this.lineDatasets, function(dataset, datasetIndex) {
                 //Iterate through each of the datasets, and build this into a property of the chart
                 this.eachPoints(function(point, index) {
@@ -161,11 +161,20 @@
             }, this);
 
             this.BarClass.prototype.base = this.scale.endPoint;
+            if (this.options.barBeginAtOrigin && this.scale.min < 0) {
+                this.BarClass.prototype.base = (-1 * parseFloat(this.scale.min) /
+                ((this.scale.max - this.scale.min) * 1.00) *
+                (this.scale.endPoint - this.scale.startPoint) +
+                this.scale.startPoint);
+            }
+            else {
+                this.BarClass.prototype.base = this.scale.endPoint;
+            }
             this.eachBars(function(bar, index, datasetIndex) {
                 helpers.extend(bar, {
                     width: this.scale.calculateBarWidth(this.barDatasets.length, this.options.overlayBars),
                     x: this.scale.calculateBarX(this.barDatasets.length, datasetIndex, index, this.options.overlayBars),
-                    y: this.scale.endPoint
+                    y: bar.base
                 });
                 bar.save();
             }, this);
@@ -203,6 +212,7 @@
                 fontFamily: this.options.scaleFontFamily,
                 valuesCount: labels.length,
                 beginAtZero: this.options.scaleBeginAtZero,
+                beginAtOrigin : this.options.barBeginAtOrigin,
                 integersOnly: this.options.scaleIntegersOnly,
                 calculateYRange: function(currentHeight) {
                     var updatedRanges = helpers.calculateScaleRange(
@@ -291,7 +301,7 @@
                 barIndex;
             for (var datasetIndex = 0; datasetIndex < this.barDatasets.length; datasetIndex++) {
                 for (barIndex = 0; barIndex < this.barDatasets[datasetIndex].bars.length; barIndex++) {
-                    if (this.barDatasets[datasetIndex].bars[barIndex].inRange(eventPosition.x, eventPosition.y) && this.barDatasets[datasetIndex].bars[barIndex].showTooltip) {
+                    if (this.barDatasets[datasetIndex].bars[barIndex].inRange(eventPosition.x, eventPosition.y, this.scale.endPoint) && this.barDatasets[datasetIndex].bars[barIndex].showTooltip) {
                         helpers.each(this.barDatasets, datasetIterator);
                         return barsArray;
                     }

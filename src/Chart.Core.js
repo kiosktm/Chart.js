@@ -1263,8 +1263,8 @@
             height: function() {
                 return this.base - this.y;
             },
-            inRange: function(chartX, chartY) {
-                return (chartX >= this.x - this.width / 2 && chartX <= this.x + this.width / 2) && chartY >= this.y;
+            inRange: function(chartX, chartY, endPoint) {
+                return (chartX >= this.x - this.width / 2 && chartX <= this.x + this.width / 2) && ((chartY >= Math.min(this.y, this.base) && chartY <= Math.max(this.y, this.base)) || chartY >= endPoint);
             }
         });
 

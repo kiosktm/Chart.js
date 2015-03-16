@@ -16,9 +16,6 @@
         //Boolean - Whether the scale should start at zero, or an order of magnitude down from the lowest value
         scaleBeginAtZero: true,
 
-        //Boolean - Whether the bars should start at the origin, or the bottom of the scale.
-        barBeginAtOrigin: true,
-
         //Boolean - Whether grid lines are shown across the chart
         scaleShowGridLines: true,
 
@@ -151,13 +148,17 @@
             }, this);
 
             this.buildScale(data.labels);
-            if (this.options.barBeginAtOrigin && this.scale.min < 0) {
-                this.BarClass.prototype.base = (-1 * parseFloat(this.scale.min) /
-                ((this.scale.max - this.scale.min) * 1.00) *
-                (this.scale.endPoint - this.scale.startPoint) +
-                this.scale.startPoint);
-            }
-            else {
+            if (this.scale.min < 0) {
+
+                var basePercetage = (-1 * parseFloat(this.scale.min) /
+                    (this.scale.max - this.scale.min) * 1.00);
+                var totalHeight = (this.scale.endPoint - this.scale.startPoint);
+                var originFromEnd = basePercetage * totalHeight;
+                var base = this.scale.endPoint - originFromEnd;
+
+
+                this.BarClass.prototype.base = base;
+            } else {
                 this.BarClass.prototype.base = this.scale.endPoint;
             }
 
@@ -232,7 +233,6 @@
                 fontFamily: this.options.scaleFontFamily,
                 valuesCount: labels.length,
                 beginAtZero: this.options.scaleBeginAtZero,
-                beginAtOrigin : this.options.barBeginAtOrigin,
                 integersOnly: this.options.scaleIntegersOnly,
                 calculateYRange: function(currentHeight) {
                     var updatedRanges = helpers.calculateScaleRange(
@@ -345,10 +345,9 @@
                         var bucketInfo = this.getLargestValue(drawBucket);
                         var bar = datasets[bucketInfo.datasetIndex].bars[bucketInfo.index];
                         if (bar.hasValue()) {
-                           if (this.options.barBeginAtOrigin && this.scale.min < 0) {
+                            if (this.scale.min < 0) {
                                 helpers.noop();
-                            }
-                            else {
+                            } else {
                                 bar.base = this.scale.endPoint;
                             }
                             //Transition then draw
@@ -379,10 +378,9 @@
                 helpers.each(datasets, function(dataset, datasetIndex) {
                     helpers.each(dataset.bars, function(bar, index) {
                         if (bar.hasValue()) {
-                            if (this.options.barBeginAtOrigin && this.scale.min < 0) {
+                            if (this.scale.min < 0) {
                                 helpers.noop();
-                            }
-                            else {
+                            } else {
                                 bar.base = this.scale.endPoint;
                             }
                             //Transition then draw

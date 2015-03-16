@@ -1434,7 +1434,7 @@
                 }
             }
         });
-
+    
         Chart.Scale = Chart.Element.extend({
             initialize: function() {
                 this.xLabels = this.labelLength > 0 ? this.xLabels.map(this.truncateLabel, this) : this.xLabels;

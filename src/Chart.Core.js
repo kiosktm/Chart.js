@@ -1612,7 +1612,12 @@
                         ctx.textAlign = "right";
                         ctx.textBaseline = "middle";
                         if (this.showLabels) {
-                            ctx.fillText(labelString, xStart - 10, yLabelCenter);
+                            if(this.customYLabel)
+                            {
+                                this.customYLabel(labelString, xStart - 10, yLabelCenter, ctx, index);
+                            }else{
+                                ctx.fillText(labelString, xStart - 10, yLabelCenter);
+                            }
                         }
 
                         // This is X axis, so draw it

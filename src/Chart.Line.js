@@ -12,6 +12,10 @@
             return false;
         },
 
+        //Function - for display custom y labels takes in value, x position, y posiition, 
+        //canvas and index of label
+        customYLabel: null,
+
         ///Boolean - Whether grid lines are shown across the chart
         scaleShowGridLines: true,
 
@@ -226,6 +230,7 @@
                 valuesCount: labels.length,
                 beginAtZero: this.options.scaleBeginAtZero,
                 integersOnly: this.options.scaleIntegersOnly,
+                customYLabel: this.options.customYLabel,
                 calculateYRange: function(currentHeight) {
                     var updatedRanges = helpers.calculateScaleRange(
                         dataTotal(),

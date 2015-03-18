@@ -17,6 +17,14 @@
  - bar (and overlay) chart can have an option passed to overlay bars (draw on top of each other), just pass the option `overlayBars:true` when creating the chart [http://jsfiddle.net/leighking2/h2f7rs8d/](http://jsfiddle.net/leighking2/h2f7rs8d/)
  - line (and overlay) chart can have an option passed to populate sparse data sets. When this is passed the chart will connect any blank values in the chart so that the line is continous (starts at the first data poitn entered and goes untill the last data point), just pass the option `populateSparseData:true` when creating the chart. [http://jsfiddle.net/leighking2/uhs6rbt8/](http://jsfiddle.net/leighking2/uhs6rbt8/)
  - line,bar and overlay charts have a new option called `labelLength`. This is a number,which if greater than 0, will trim x-axis labels to a specific length [http://fiddle.jshell.net/leighking2/vepoxa54/](http://fiddle.jshell.net/leighking2/vepoxa54/)
+ - line, bar and overlay charts have a new option called `customYLabel`, this is function that can be used to give a custom display to y labels, here is an example showing the parameters and changing the colour of the label based on the index position (also a fiddle) [http://fiddle.jshell.net/leighking2/jLzvhf4f/](http://fiddle.jshell.net/leighking2/jLzvhf4f/)
+ 
+             customYLabel: function (value, x, y, ctx, index) {
+                     var defaultStyle = ctx.fillStyle;
+                     ctx.fillStyle = '#' + intToARGB(index * 123456);
+                     ctx.fillText(value, x, y);
+                     ctx.fillStyle = defaultStyle;
+              }
 
 Most new features are documented in the forks docs section or follow the links to the fiddles to see a working example.
 ## Documentation

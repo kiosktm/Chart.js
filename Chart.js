@@ -1264,7 +1264,7 @@
                 return this.base - this.y;
             },
             inRange: function(chartX, chartY) {
-                return (chartX >= this.x - this.width / 2 && chartX <= this.x + this.width / 2) && (chartY >= this.y && (chartY <= this.base || chartY > this.base));
+                return (chartX >= this.x - this.width / 2 && chartX <= this.x + this.width / 2) && chartY >= this.y;
             }
         });
 
@@ -1612,7 +1612,12 @@
                         ctx.textAlign = "right";
                         ctx.textBaseline = "middle";
                         if (this.showLabels) {
-                            ctx.fillText(labelString, xStart - 10, yLabelCenter);
+                            if(this.customYLabel)
+                            {
+                                this.customYLabel(labelString, xStart - 10, yLabelCenter, ctx, index);
+                            }else{
+                                ctx.fillText(labelString, xStart - 10, yLabelCenter);
+                            }
                         }
 
                         // This is X axis, so draw it
@@ -2027,6 +2032,10 @@
             return false;
         },
 
+        //Function - for display custom y labels takes in value, x position, y posiition, 
+        //canvas and index of label
+        customYLabel: null,
+        
         //Boolean - Whether the scale should start at zero, or an order of magnitude down from the lowest value
         scaleBeginAtZero: true,
 
@@ -2237,6 +2246,7 @@
                 valuesCount: labels.length,
                 beginAtZero: this.options.scaleBeginAtZero,
                 integersOnly: this.options.scaleIntegersOnly,
+                customYLabel: this.options.customYLabel,
                 calculateYRange: function(currentHeight) {
                     var updatedRanges = helpers.calculateScaleRange(
                         dataTotal(),
@@ -2613,6 +2623,10 @@
             return false;
         },
 
+        //Function - for display custom y labels takes in value, x position, y posiition, 
+        //canvas and index of label
+        customYLabel: null,
+
         ///Boolean - Whether grid lines are shown across the chart
         scaleShowGridLines: true,
 
@@ -2827,6 +2841,7 @@
                 valuesCount: labels.length,
                 beginAtZero: this.options.scaleBeginAtZero,
                 integersOnly: this.options.scaleIntegersOnly,
+                customYLabel: this.options.customYLabel,
                 calculateYRange: function(currentHeight) {
                     var updatedRanges = helpers.calculateScaleRange(
                         dataTotal(),
@@ -3310,6 +3325,7 @@
                 valuesCount: labels.length,
                 beginAtZero: this.options.scaleBeginAtZero,
                 integersOnly: this.options.scaleIntegersOnly,
+                customYLabel: this.options.customYLabel,
                 calculateYRange: function(currentHeight) {
                     var updatedRanges = helpers.calculateScaleRange(
                         dataTotal(),

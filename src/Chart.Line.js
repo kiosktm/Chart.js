@@ -162,11 +162,22 @@
 
                 this.buildScale(data.labels);
 
+                if (this.scale.min < 0) {
+                    var basePercetage = (-1 * parseFloat(this.scale.min) /
+                        (this.scale.max - this.scale.min) * 1.00);
+                    var totalHeight = (this.scale.endPoint - this.scale.startPoint);
+                    var originFromEnd = basePercetage * totalHeight;
+                    var base = this.scale.endPoint - originFromEnd;
+            
 
+                    this.PointClass.prototype.base = base;
+                } else {
+                    this.PointClass.prototype.base = this.scale.endPoint;
+                }
                 this.eachPoints(function(point, index) {
                     helpers.extend(point, {
                         x: this.scale.calculateX(index),
-                        y: this.scale.endPoint
+                        y: point.base
                     });
                     point.save();
                 }, this);
@@ -276,7 +287,7 @@
                     value: value,
                     label: label,
                     x: this.scale.calculateX(this.scale.valuesCount + 1),
-                    y: this.scale.endPoint,
+                    y: this.scale.base,
                     strokeColor: this.datasets[datasetIndex].pointStrokeColor,
                     fillColor: this.datasets[datasetIndex].pointColor
                 }));
@@ -366,7 +377,11 @@
                 var started = false;
 
                 helpers.each(dataset.points, function(point, index) {
-
+                    if (this.scale.min < 0) {
+                        helpers.noop();
+                    } else {
+                        point.base = this.scale.endPoint;
+                    }
                     /**
                      * no longer draw if the last point was ignore (as we don;t have anything to draw from)
                      * or if this point is ignore
@@ -412,8 +427,8 @@
                             point = this.getLastDataPoint(dataset, index);
                         }
                         if (this.options.datasetFill) {
-                            ctx.lineTo(point.x, this.scale.endPoint);
-                            ctx.lineTo(start.x, this.scale.endPoint);
+                            ctx.lineTo(point.x, point.base);
+                            ctx.lineTo(start.x, point.base);
                             ctx.fillStyle = dataset.fillColor;
                             ctx.closePath();
                             if (point.x != start.x) {

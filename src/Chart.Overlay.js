@@ -149,23 +149,36 @@
 
             this.buildScale(data.labels);
 
+
+
+
+            if (this.scale.min < 0) {
+                var basePercetage = (-1 * parseFloat(this.scale.min) /
+                    (this.scale.max - this.scale.min) * 1.00);
+                var totalHeight = (this.scale.endPoint - this.scale.startPoint);
+                var originFromEnd = basePercetage * totalHeight;
+                var base = this.scale.endPoint - originFromEnd;
+
+                this.BarClass.prototype.base = this.PointClass.prototype.base = base;
+            } else {
+                this.BarClass.prototype.base = this.PointClass.prototype.base = this.scale.endPoint;
+            }
             helpers.each(this.lineDatasets, function(dataset, datasetIndex) {
                 //Iterate through each of the datasets, and build this into a property of the chart
                 this.eachPoints(function(point, index) {
                     helpers.extend(point, {
                         x: this.scale.calculateX(index),
-                        y: this.scale.endPoint
+                        y: point.base
                     });
                     point.save();
                 }, this);
             }, this);
 
-            this.BarClass.prototype.base = this.scale.endPoint;
             this.eachBars(function(bar, index, datasetIndex) {
                 helpers.extend(bar, {
                     width: this.scale.calculateBarWidth(this.barDatasets.length, this.options.overlayBars),
                     x: this.scale.calculateBarX(this.barDatasets.length, datasetIndex, index, this.options.overlayBars),
-                    y: this.scale.endPoint
+                    y: bar.base
                 });
                 bar.save();
             }, this);
@@ -292,7 +305,7 @@
                 barIndex;
             for (var datasetIndex = 0; datasetIndex < this.barDatasets.length; datasetIndex++) {
                 for (barIndex = 0; barIndex < this.barDatasets[datasetIndex].bars.length; barIndex++) {
-                    if (this.barDatasets[datasetIndex].bars[barIndex].inRange(eventPosition.x, eventPosition.y) && this.barDatasets[datasetIndex].bars[barIndex].showTooltip) {
+                    if (this.barDatasets[datasetIndex].bars[barIndex].inRange(eventPosition.x, eventPosition.y, this.scale.endPoint) && this.barDatasets[datasetIndex].bars[barIndex].showTooltip) {
                         helpers.each(this.barDatasets, datasetIterator);
                         return barsArray;
                     }
@@ -315,6 +328,7 @@
                             label: label,
                             x: this.scale.calculateX(this.scale.valuesCount + 1),
                             y: this.scale.endPoint,
+                            base: this.scale.endPoint,
                             strokeColor: this.lineDatasets[lineDataSetIndex].pointStrokeColor,
                             fillColor: this.lineDatasets[lineDataSetIndex].pointColor
                         }));
@@ -356,6 +370,10 @@
         },
         reflow: function() {
             helpers.extend(this.BarClass.prototype, {
+                y: this.scale.endPoint,
+                base: this.scale.endPoint
+            });
+            helpers.extend(this.PointClass.prototype, {
                 y: this.scale.endPoint,
                 base: this.scale.endPoint
             });

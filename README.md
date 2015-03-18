@@ -6,6 +6,7 @@
 *Simple HTML5 Charts using the canvas element* [chartjs.org](http://www.chartjs.org)
 ##Changes
  - Bar chart tool-tip will show when hovering labels as well as data (this was the norm for line charts so just brought the two in-line)
+ - Line, Bar and OVerlay charts now handle negative values better, just make sure you pass `scaleBeginAtZero: false,` so that the chart does not reset the scale [http://fiddle.jshell.net/leighking2/gvo0u2oy/](http://fiddle.jshell.net/leighking2/gvo0u2oy/)
 
 ##New Features In This Fork
  - labelsFilter to filter x-axis labels based on user provided function [http://jsfiddle.net/leighking2/mea767ss](http://jsfiddle.net/leighking2/mea767ss/)

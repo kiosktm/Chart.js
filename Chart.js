@@ -2182,7 +2182,7 @@
                     (this.scale.max - this.scale.min) * 1.00);
                 var totalHeight = (this.scale.endPoint - this.scale.startPoint);
                 var originFromEnd = basePercetage * totalHeight;
-                var base = this.scale.endPoint - originFromEnd;
+                var base = this.scale.endPoint - originFromEnd + this.options.scaleGridLineWidth
 
 
                 this.BarClass.prototype.base = base;
@@ -2802,7 +2802,7 @@
                         (this.scale.max - this.scale.min) * 1.00);
                     var totalHeight = (this.scale.endPoint - this.scale.startPoint);
                     var originFromEnd = basePercetage * totalHeight;
-                    var base = this.scale.endPoint - originFromEnd;
+                    var base = this.scale.endPoint - originFromEnd + this.options.scaleGridLineWidth;
             
 
                     this.PointClass.prototype.base = base;
@@ -3317,7 +3317,7 @@
                     (this.scale.max - this.scale.min) * 1.00);
                 var totalHeight = (this.scale.endPoint - this.scale.startPoint);
                 var originFromEnd = basePercetage * totalHeight;
-                var base = this.scale.endPoint - originFromEnd;
+                var base = this.scale.endPoint - originFromEnd + this.options.scaleGridLineWidth;
 
                 this.BarClass.prototype.base = this.PointClass.prototype.base = base;
             } else {

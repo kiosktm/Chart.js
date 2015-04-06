@@ -1,7 +1,7 @@
 /*!
  * Chart.js
  * http://chartjs.org/
- * Version: 1.0.1
+ * Version: 1.0.2
  *
  * Copyright 2015 Nick Downie
  * Released under the MIT license
@@ -24,12 +24,31 @@
 
             this.ctx = context;
 
-            //Variables global to the chart
-            var width = this.width = context.canvas.width;
-            var height = this.height = context.canvas.height;
-            this.aspectRatio = this.width / this.height;
-            //High pixel density displays - multiply the size of the canvas height/width by the device pixel ratio, then scale.
-            helpers.retinaScale(this);
+		//Variables global to the chart
+		var computeDimension = function(element,dimension)
+		{
+			if (element['offset'+dimension])
+			{
+				return element['offset'+dimension];
+			}
+			else
+			{
+				return document.defaultView.getComputedStyle(element).getPropertyValue(dimension);
+			}
+		};
+
+		var width = this.width = computeDimension(context.canvas,'Width') || context.canvas.width;
+		var height = this.height = computeDimension(context.canvas,'Height') || context.canvas.height;
+
+		// Firefox requires this to work correctly
+		context.canvas.width  = width;
+		context.canvas.height = height;
+
+		width = this.width = context.canvas.width;
+		height = this.height = context.canvas.height;
+		this.aspectRatio = this.width / this.height;
+		//High pixel density displays - multiply the size of the canvas height/width by the device pixel ratio, then scale.
+		helpers.retinaScale(this);
 
             return this;
         };
@@ -317,7 +336,20 @@
             },
             getDecimalPlaces = helpers.getDecimalPlaces = function(num) {
                 if (num % 1 !== 0 && isNumber(num)) {
-                    return num.toString().split(".")[1].length;
+                    var s = num.toString();
+					if(s.indexOf("e-") < 0){
+						// no exponent, e.g. 0.01
+						return s.split(".")[1].length;
+					}
+					else if(s.indexOf(".") < 0) {
+						// no decimal point, e.g. 1e-9
+						return parseInt(s.split("e-")[1]);
+					}
+					else {
+						// exponent and decimal point, e.g. 1.23e-9
+						var parts = s.split(".")[1].split("e-");
+						return parts[0].length + parseInt(parts[1]);
+					}
                 } else {
                     return 0;
                 }
@@ -490,7 +522,7 @@
             /* jshint ignore:end */
             generateLabels = helpers.generateLabels = function(templateString, numberOfSteps, graphMin, stepValue) {
                 var labelsArray = new Array(numberOfSteps);
-                if (labelTemplateString) {
+                if (templateString) {
                     each(labelsArray, function(val, index) {
                         labelsArray[index] = template(templateString, {
                             value: (graphMin + (stepValue * (index + 1)))
@@ -832,7 +864,7 @@
             },
             stop: function() {
                 // Stops any current animation loop occuring
-                helpers.cancelAnimFrame.call(window, this.animationFrame);
+                cancelAnimFrame.call(window, this.animationFrame);
                 return this;
             },
             resize: function(callback) {
@@ -1368,7 +1400,6 @@
                 var halfHeight = this.height / 2;
 
                 //Check to ensure the height will fit on the canvas
-                //The three is to buffer form the very
                 if (this.y - halfHeight < 0) {
                     this.y = halfHeight;
                 } else if (this.y + halfHeight > this.chart.height) {
@@ -1583,8 +1614,7 @@
                 var isRotated = (this.xLabelRotation > 0),
                     // innerWidth = (this.offsetGridLines) ? this.width - offsetLeft - this.padding : this.width - (offsetLeft + halfLabelWidth * 2) - this.padding,
                     innerWidth = this.width - (this.xScalePaddingLeft + this.xScalePaddingRight),
-                    //if we only have one data point take nothing off the count otherwise we get infinity
-                    valueWidth = innerWidth / (this.valuesCount - ((this.offsetGridLines) || this.valuesCount === 1 ? 0 : 1)),
+                    valueWidth = innerWidth/Math.max((this.valuesCount - ((this.offsetGridLines) ? 0 : 1)), 1),
                     valueOffset = (valueWidth * index) + this.xScalePaddingLeft;
 
                 if (this.offsetGridLines) {

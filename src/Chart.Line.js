@@ -65,8 +65,13 @@
         labelLength: 0,
 
         //String - A legend template
-        legendTemplate: "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].strokeColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>"
+        legendTemplate: "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].strokeColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>",
 
+        //Array - specific yAxis details
+        yAxes: [],
+
+        //Boolean - set default yAxis on the left of chart
+        scalePositionLeft: true,
     };
 
 
@@ -137,7 +142,9 @@
                     pointColor: dataset.pointColor,
                     pointStrokeColor: dataset.pointStrokeColor,
                     showTooltip: dataset.showTooltip,
-                    points: []
+                    points: [],
+                    yAxesGroup: dataset.yAxesGroup,
+                    values: dataset.data
                 };
 
                 this.datasets.push(datasetObject);
@@ -159,30 +166,31 @@
                         highlightStroke: dataset.pointHighlightStroke || dataset.pointStrokeColor
                     }));
                 }, this);
-
-                this.buildScale(data.labels);
-
-                if (this.scale.min < 0) {
-                    var basePercetage = (-1 * parseFloat(this.scale.min) /
-                        (this.scale.max - this.scale.min) * 1.00);
-                    var totalHeight = (this.scale.endPoint - this.scale.startPoint);
-                    var originFromEnd = basePercetage * totalHeight;
-                    var base = this.scale.endPoint - originFromEnd + this.options.scaleGridLineWidth;
-            
-
-                    this.PointClass.prototype.base = base;
-                } else {
-                    this.PointClass.prototype.base = this.scale.endPoint;
-                }
-                this.eachPoints(function(point, index) {
-                    helpers.extend(point, {
-                        x: this.scale.calculateX(index),
-                        y: point.base
-                    });
-                    point.save();
-                }, this);
-
             }, this);
+
+            this.buildScale(data.labels);
+
+            if (this.scale.min < 0) {
+                var basePercetage = (-1 * parseFloat(this.scale.min) /
+                    (this.scale.max - this.scale.min) * 1.00);
+                var totalHeight = (this.scale.endPoint - this.scale.startPoint);
+                var originFromEnd = basePercetage * totalHeight;
+                var base = this.scale.endPoint - originFromEnd + this.options.scaleGridLineWidth;
+        
+
+                this.PointClass.prototype.base = base;
+            } else {
+                this.PointClass.prototype.base = this.scale.endPoint;
+            }
+            this.eachPoints(function(point, index) {
+                helpers.extend(point, {
+                    x: this.scale.calculateX(index),
+                    y: this.scale.endPoint
+                });
+                point.save();
+            }, this);
+
+           
 
 
             this.render();
@@ -242,16 +250,6 @@
                 beginAtZero: this.options.scaleBeginAtZero,
                 integersOnly: this.options.scaleIntegersOnly,
                 customYLabel: this.options.customYLabel,
-                calculateYRange: function(currentHeight) {
-                    var updatedRanges = helpers.calculateScaleRange(
-                        dataTotal(),
-                        currentHeight,
-                        this.fontSize,
-                        this.beginAtZero,
-                        this.integersOnly
-                    );
-                    helpers.extend(this, updatedRanges);
-                },
                 xLabels: labels,
                 font: helpers.fontString(this.options.scaleFontSize, this.options.scaleFontStyle, this.options.scaleFontFamily),
                 lineWidth: this.options.scaleLineWidth,
@@ -262,7 +260,10 @@
                 gridLineColor: (this.options.scaleShowGridLines) ? this.options.scaleGridLineColor : "rgba(0,0,0,0)",
                 padding: (this.options.showScale) ? 0 : this.options.pointDotRadius + this.options.pointDotStrokeWidth,
                 showLabels: this.options.scaleShowLabels,
-                display: this.options.showScale
+                display: this.options.showScale,
+                yAxes: this.yAxes,
+                positionLeft: this.options.scalePositionLeft,
+                datasets: this.datasets,
             };
 
             if (this.options.scaleOverride) {
@@ -289,7 +290,8 @@
                     x: this.scale.calculateX(this.scale.valuesCount + 1),
                     y: this.scale.base,
                     strokeColor: this.datasets[datasetIndex].pointStrokeColor,
-                    fillColor: this.datasets[datasetIndex].pointColor
+                    fillColor: this.datasets[datasetIndex].pointColor,
+                    yAxesGroup: this.datasets[datasetIndex].yAxesGroup
                 }));
             }, this);
 
@@ -337,7 +339,7 @@
 
                 helpers.each(dataset.points, function(point, index) {
                     point.transition({
-                        y: this.scale.calculateY(point.value),
+                        y: this.scale.calculateY(point),
                         x: this.scale.calculateX(index)
                     }, easingDecimal);
 

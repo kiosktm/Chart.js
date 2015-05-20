@@ -25,6 +25,7 @@
         datasets: [
             {
                 label: "My First dataset",
+                yAxesGroup: "main",
                 fillColor: "rgba(220,220,220,0.2)",
                 strokeColor: "rgba(220,220,220,1)",
                 pointColor: "rgba(220,220,220,1)",
@@ -36,13 +37,14 @@
             }, 
             {
                 label: "My Second dataset",
+                yAxesGroup: "second",
                 fillColor: "rgba(151,187,205,0.2)",
                 strokeColor: "rgba(151,187,205,1)",
                 pointColor: "rgba(151,187,205,1)",
                 pointStrokeColor: "#fff",
                 pointHighlightFill: "#fff",
                 pointHighlightStroke: "rgba(151,187,205,1)",
-                data: [null, 10, null, null, 60, null, null]
+                data: [null, -10, null, null, 60, null, null]
 
             }
         ]
@@ -56,8 +58,6 @@
             populateSparseData: true,
             animation:false,
             bezierCurve:true,
-            scaleShowVerticalLines: false,
-scaleShowHorizontalLines: false
         });
     }
     </script>

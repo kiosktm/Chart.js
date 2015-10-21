@@ -401,12 +401,12 @@
                 return Math.floor(Math.log(val) / Math.LN10);
             },
             calculateScaleRange = helpers.calculateScaleRange = function(valuesArray, drawingSize, textSize, startFromZero, integersOnly) {
-
+                if(valuesArray.length > 0)
+                {
                 //Set a minimum step of two - a point at the top of the graph, and a point at the base
                 var minSteps = 2,
                     maxSteps = Math.floor(drawingSize / (textSize * 1.5)),
                     skipFitting = (minSteps >= maxSteps);
-
                 var maxValue = max(valuesArray),
                     minValue = min(valuesArray);
 
@@ -430,7 +430,6 @@
                     graphRange = graphMax - graphMin,
                     stepValue = Math.pow(10, rangeOrderOfMagnitude),
                     numberOfSteps = Math.round(graphRange / stepValue);
-
                 //If we have more space on the graph we'll use it to give more definition to the data
                 while ((numberOfSteps > maxSteps || (numberOfSteps * 2) < maxSteps) && !skipFitting) {
                     if (numberOfSteps > maxSteps) {
@@ -468,13 +467,22 @@
                     numberOfSteps = minSteps;
                     stepValue = graphRange / numberOfSteps;
                 }
-
                 return {
                     steps: numberOfSteps,
                     stepValue: stepValue,
                     min: graphMin,
                     max: graphMin + (numberOfSteps * stepValue)
                 };
+
+
+            }else{
+                return {
+                    steps: 0,
+                    stepValue: 0,
+                    min: 0,
+                    max:0
+                };
+            }
 
             },
             /* jshint ignore:start */
@@ -1524,12 +1532,7 @@
                             position = (xEnd + 20) + labelOffset;
                         }
 
-                        if(this.customYLabel)
-                        {
-                            this.customYLabel(abelString, position, yLabelCenter, ctx, index);
-                        }else{
-                            ctx.fillText(labelString, position, yLabelCenter);
-                        }
+                        ctx.fillText(labelString, position, yLabelCenter);
                     }
 
                     // This is X axis, so draw it
@@ -1763,10 +1766,12 @@
     
         Chart.Scale = Chart.Element.extend({
             initialize: function() {
-                // this.xLabels = this.labelLength > 0 ? this.xLabels.map(this.truncateLabel, this) : this.xLabels;
+                this.xLabels = this.labelLength > 0 ? this.xLabels.map(this.truncateLabel, this) : this.xLabels;
                 this.setUpYAxes();
-                console.log(this.yAxes)
                 this.fit();
+            },
+             truncateLabel: function(label) {
+                return label.substring(0, this.labelLength);
             },
             setUpYAxes: function() {
                 this.yAxes = new Chart.YAxes({
@@ -1829,7 +1834,6 @@
                 // To do that we need the base line at the top and base of the chart, assuming there is no x label rotation
                 this.startPoint = (this.display) ? this.fontSize : 0;
                 this.endPoint = (this.display) ? this.height - (this.fontSize * 1.5) - 5 : this.height; // -5 to pad labels
-
                 // Apply padding settings to the start and end point.
                 this.startPoint += this.padding;
                 this.endPoint -= this.padding;
@@ -1943,6 +1947,20 @@
                     scalingFactor = this.drawingArea() / (min - max);
                 return this.endPoint - (scalingFactor * (point.value - min));
             },
+
+            getAxisMin: function(point){
+                var yAxesGroup = this.yAxes.getYAxisByGroupName(point.yAxesGroup) || this.yAxes.getYAxisByIndex(0);
+                return yAxesGroup.min;
+            },
+            getAxisBase: function(point){
+                var yAxesGroup = this.yAxes.getYAxisByGroupName(point.yAxesGroup) || this.yAxes.getYAxisByIndex(0);
+                var basePercetage = (-1 * parseFloat(yAxesGroup.min) /
+                    (yAxesGroup.max - yAxesGroup.min) * 1.00);
+                var totalHeight = (yAxesGroup.endPoint - yAxesGroup.startPoint);
+                var originFromEnd = basePercetage * totalHeight;
+                var base = yAxesGroup.endPoint - originFromEnd + yAxesGroup.lineWidth
+                return base;
+            },
             calculateX: function(index) {
                  var isRotated = (this.xLabelRotation > 0),
                 // innerWidth = (this.offsetGridLines) ? this.width - offsetLeft - this.padding : this.width - (offsetLeft + halfLabelWidth * 2) - this.padding,
@@ -1967,7 +1985,7 @@
                     each(this.xLabels, function(label, index) {
                     	//if filter returns true do not draw this label
 						//if filter returns true do not draw this label
-						if(this.labelsFilter(label, index)){
+						if(this.labelsFilter(label, index, this.xLabels)){
 							return;
 						}
                         var xPos = this.calculateX(index) + aliasPixel(this.lineWidth),

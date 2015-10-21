@@ -12,10 +12,6 @@
             return false;
         },
 
-        //Function - for display custom y labels takes in value, x position, y posiition, 
-        //canvas and index of label
-        customYLabel: null,
-
         ///Boolean - Whether grid lines are shown across the chart
         scaleShowGridLines: true,
 
@@ -92,7 +88,7 @@
             });
 
             this.datasets = [];
-
+            this.yAxes = data.yAxes;
             //Set up tooltip events on the chart
             if (this.options.showTooltips) {
                 helpers.bindEvents(this, this.options.tooltipEvents, function(evt) {
@@ -163,7 +159,8 @@
                         strokeColor: dataset.pointStrokeColor,
                         fillColor: dataset.pointColor,
                         highlightFill: dataset.pointHighlightFill || dataset.pointColor,
-                        highlightStroke: dataset.pointHighlightStroke || dataset.pointStrokeColor
+                        highlightStroke: dataset.pointHighlightStroke || dataset.pointStrokeColor,
+                        yAxesGroup: dataset.yAxesGroup,
                     }));
                 }, this);
             }, this);
@@ -176,7 +173,7 @@
                 var totalHeight = (this.scale.endPoint - this.scale.startPoint);
                 var originFromEnd = basePercetage * totalHeight;
                 var base = this.scale.endPoint - originFromEnd + this.options.scaleGridLineWidth;
-        
+
 
                 this.PointClass.prototype.base = base;
             } else {
@@ -190,7 +187,7 @@
                 point.save();
             }, this);
 
-           
+
 
 
             this.render();
@@ -234,7 +231,6 @@
 
                 return values;
             };
-
             var scaleOptions = {
                 labelLength: this.options.labelLength,
                 templateString: this.options.scaleLabel,
@@ -249,7 +245,6 @@
                 valuesCount: labels.length,
                 beginAtZero: this.options.scaleBeginAtZero,
                 integersOnly: this.options.scaleIntegersOnly,
-                customYLabel: this.options.customYLabel,
                 xLabels: labels,
                 font: helpers.fontString(this.options.scaleFontSize, this.options.scaleFontStyle, this.options.scaleFontFamily),
                 lineWidth: this.options.scaleLineWidth,
@@ -281,7 +276,6 @@
         },
         addData: function(valuesArray, label) {
             //Map the values array for each of the datasets
-
             helpers.each(valuesArray, function(value, datasetIndex) {
                 //Add a new point for each piece of data, passing any required data to draw.
                 this.datasets[datasetIndex].points.push(new this.PointClass({
@@ -350,6 +344,7 @@
                 // This would cause issues when there is no animation, because the y of the next point would be 0, so beziers would be skewed
                 if (this.options.bezierCurve) {
                     helpers.each(dataset.points, function(point, index) {
+
                         //If we're at the start or end, we don't have a previous/next point
                         //By setting the tension to 0 here, the curve will transition to straight at the end
                         var nextPoint, previousPoint, thispoint;
@@ -379,8 +374,8 @@
                 var started = false;
 
                 helpers.each(dataset.points, function(point, index) {
-                    if (this.scale.min < 0) {
-                        helpers.noop();
+                    if (this.scale.getAxisMin(point) < 0) {
+                        point.base = this.scale.getAxisBase(point);
                     } else {
                         point.base = this.scale.endPoint;
                     }

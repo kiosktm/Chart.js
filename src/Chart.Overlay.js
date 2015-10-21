@@ -61,7 +61,7 @@
             });
 
             this.datasets = [];
-
+            this.yAxes = data.yAxes;
             //Set up tooltip events on the chart
             if (this.options.showTooltips) {
                 helpers.bindEvents(this, this.options.tooltipEvents, function(evt) {
@@ -102,7 +102,9 @@
                     pointColor: dataset.pointColor,
                     pointStrokeColor: dataset.pointStrokeColor,
                     showTooltip: dataset.showTooltip,
-                    points: []
+                    points: [],
+                    yAxesGroup: dataset.yAxesGroup,
+                    values: dataset.data
                 };
 
                 this.datasets.push(datasetObject);
@@ -120,7 +122,8 @@
                                 strokeColor: dataset.pointStrokeColor,
                                 fillColor: dataset.pointColor,
                                 highlightFill: dataset.pointHighlightFill || dataset.pointColor,
-                                highlightStroke: dataset.pointHighlightStroke || dataset.pointStrokeColor
+                                highlightStroke: dataset.pointHighlightStroke || dataset.pointStrokeColor,
+                                yAxesGroup: dataset.yAxesGroup,
                             }));
                         }, this);
                         break;
@@ -137,7 +140,8 @@
                                 strokeColor: dataset.strokeColor,
                                 fillColor: dataset.fillColor,
                                 highlightFill: dataset.highlightFill || dataset.fillColor,
-                                highlightStroke: dataset.highlightStroke || dataset.strokeColor
+                                highlightStroke: dataset.highlightStroke || dataset.strokeColor,
+                                yAxesGroup: dataset.yAxesGroup,
                             }));
                         }, this);
 
@@ -202,7 +206,6 @@
                 });
                 return values;
             };
-
             var scaleOptions = {
                 labelLength: this.options.labelLength,
                 labelsFilter: this.options.labelsFilter,
@@ -217,17 +220,6 @@
                 valuesCount: labels.length,
                 beginAtZero: this.options.scaleBeginAtZero,
                 integersOnly: this.options.scaleIntegersOnly,
-                customYLabel: this.options.customYLabel,
-                calculateYRange: function(currentHeight) {
-                    var updatedRanges = helpers.calculateScaleRange(
-                        dataTotal(),
-                        currentHeight,
-                        this.fontSize,
-                        this.beginAtZero,
-                        this.integersOnly
-                    );
-                    helpers.extend(this, updatedRanges);
-                },
                 xLabels: labels,
                 font: helpers.fontString(this.options.scaleFontSize, this.options.scaleFontStyle, this.options.scaleFontFamily),
                 lineWidth: this.options.scaleLineWidth,
@@ -238,7 +230,10 @@
                 showVerticalLines: this.options.scaleShowVerticalLines,
                 padding: (this.options.showScale) ? 0 : (this.options.barShowStroke) ? this.options.barStrokeWidth : 0,
                 showLabels: this.options.scaleShowLabels,
-                display: this.options.showScale
+                display: this.options.showScale,
+                yAxes: this.yAxes,
+                positionLeft: this.options.scalePositionLeft,
+                datasets: this.datasets,
             };
 
             if (this.options.scaleOverride) {
@@ -330,7 +325,8 @@
                             y: this.scale.endPoint,
                             base: this.scale.endPoint,
                             strokeColor: this.lineDatasets[lineDataSetIndex].pointStrokeColor,
-                            fillColor: this.lineDatasets[lineDataSetIndex].pointColor
+                            fillColor: this.lineDatasets[lineDataSetIndex].pointColor,
+                            yAxesGroup: this.datasets[datasetIndex].yAxesGroup
                         }));
                         lineDataSetIndex++;
                         break;
@@ -345,7 +341,8 @@
                             width: this.scale.calculateBarWidth(this.barDatasets.length),
                             base: this.scale.endPoint,
                             strokeColor: this.barDatasets[barDataSetIndex].strokeColor,
-                            fillColor: this.barDatasets[barDataSetIndex].fillColor
+                            fillColor: this.barDatasets[barDataSetIndex].fillColor,
+                            yAxesGroup: this.datasets[datasetIndex].yAxesGroup
                         }));
                         barDataSetIndex++;
                         break;

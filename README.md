@@ -18,6 +18,66 @@
  - bar (and overlay) chart can have an option passed to overlay bars (draw on top of each other), just pass the option `overlayBars:true` when creating the chart [http://jsfiddle.net/leighking2/h2f7rs8d/](http://jsfiddle.net/leighking2/h2f7rs8d/)
  - line (and overlay) chart can have an option passed to populate sparse data sets. When this is passed the chart will connect any blank values in the chart so that the line is continous (starts at the first data poitn entered and goes untill the last data point), just pass the option `populateSparseData:true` when creating the chart. [http://jsfiddle.net/leighking2/uhs6rbt8/](http://jsfiddle.net/leighking2/uhs6rbt8/)
  - line,bar and overlay charts have a new option called `labelLength`. This is a number,which if greater than 0, will trim x-axis labels to a specific length [http://fiddle.jshell.net/leighking2/vepoxa54/](http://fiddle.jshell.net/leighking2/vepoxa54/)
+ - Multiple y-axis can now be set on bar, line and overlay charts. This feature allow for more than 1 y-axis to be decalred and options to be set for it at a very basic level with no extra options to have multiple axis just include ` yAxesGroup: GROUPNAME` with each dataset, any that are set to the same will be combined.
+ 
+             datasets: [{
+                         label: "My First dataset",
+                         type: "bar",
+                         yAxesGroup: "1",
+                         fillColor: "rgba(151,137,200,0.5)",
+                         strokeColor: "rgba(151,137,200,0.8)",
+                         highlightFill: "rgba(151,137,200,0.75)",
+                         highlightStroke: "rgba(151,137,200,1)",
+                         data: [28, 48, 40, 19, 86, 27, 90]
+                     }, {
+                         label: "My Second dataset",
+                         type: "line",
+                         yAxesGroup: "2",
+                         fillColor: "rgba(151,187,205,0.5)",
+                         strokeColor: "rgba(151,187,205,0.8)",
+                         highlightFill: "rgba(151,187,205,0.75)",
+                         highlightStroke: "rgba(151,187,205,1)",
+                         data: [8, 38, 30, 29, 46, 67, 80]
+                     }]
+
+for more control a further option can be passed with the data called `yAxes` in which you can specify fontColour, poisition and other settings like
+
+                     var overlayData = {
+                             labels: ["January", "Februarya", "March", "April", "May", "Jun", "July"],
+                             datasets: [{
+                                 label: "My First dataset",
+                                 type: "bar",
+                                 yAxesGroup: "1",
+                                 fillColor: "rgba(151,137,200,0.5)",
+                                 strokeColor: "rgba(151,137,200,0.8)",
+                                 highlightFill: "rgba(151,137,200,0.75)",
+                                 highlightStroke: "rgba(151,137,200,1)",
+                                 data: [28, 48, 40, 19, 86, 27, 90]
+                             }, {
+                                 label: "My Second dataset",
+                                 type: "line",
+                                 yAxesGroup: "2",
+                                 fillColor: "rgba(151,187,205,0.5)",
+                                 strokeColor: "rgba(151,187,205,0.8)",
+                                 highlightFill: "rgba(151,187,205,0.75)",
+                                 highlightStroke: "rgba(151,187,205,1)",
+                                 data: [8, 38, 30, 29, 46, 67, 80]
+                             }],
+                             yAxes: [{
+                                 name: "1",
+                                 scalePositionLeft: false, //setting to false will dispaly this on the right side of the graph
+                                 scaleFontColor: "rgba(151,137,200,0.8)"
+                             }, {
+                                 name: "2",
+                                 scalePositionLeft: true,
+                                 scaleFontColor: "rgba(151,187,205,0.8)"
+                             }]
+                         };
+                         
+ just make sure that the name in the `yAxes` group matches 1 of the names declared in the datasets
+              
+### Feature Removed
+This feature has been removed as it clashed with the multiple y axis feature, this feature was orginoally added to mainly colour the y axis but this is achived in the multiple y axis feature much easier so this has been removed now
  - line, bar and overlay charts have a new option called `customYLabel`, this is function that can be used to give a custom display to y labels, here is an example showing the parameters and changing the colour of the label based on the index position (also a fiddle) [http://fiddle.jshell.net/leighking2/jLzvhf4f/](http://fiddle.jshell.net/leighking2/jLzvhf4f/)
  
              customYLabel: function (value, x, y, ctx, index) {

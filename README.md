@@ -76,12 +76,15 @@ for more control a further option can be passed with the data called `yAxes` in 
                          
  just make sure that the name in the `yAxes` group matches 1 of the names declared in the datasets.
  
- Examples
- Overlay -
+ Examples:
+ 
+ - Overlay
  [http://fiddle.jshell.net/leighking2/2pb5xwez/](http://fiddle.jshell.net/leighking2/2pb5xwez/)
- Bar - with two bar groups in one axis and another bar in a second
+
+ - Bar - with two bar groups in one axis and another bar in a second
  [http://fiddle.jshell.net/leighking2/b233c2f0/](http://fiddle.jshell.net/leighking2/b233c2f0/)
- line - using old features such as populating sparse datasets
+
+ - line - using old features such as populating sparse datasets
  [http://fiddle.jshell.net/leighking2/8ae9go3y/](http://fiddle.jshell.net/leighking2/8ae9go3y/)
  
 Most new features are documented in the forks docs section or follow the links to the fiddles to see a working example.           

@@ -74,9 +74,11 @@ for more control a further option can be passed with the data called `yAxes` in 
                              }]
                          };
                          
- just make sure that the name in the `yAxes` group matches 1 of the names declared in the datasets
-              
-### Feature Removed
+ just make sure that the name in the `yAxes` group matches 1 of the names declared in the datasets. [http://fiddle.jshell.net/leighking2/2pb5xwez/](http://fiddle.jshell.net/leighking2/2pb5xwez/)
+ 
+ 
+Most new features are documented in the forks docs section or follow the links to the fiddles to see a working example.           
+## Feature Removed
 This feature has been removed as it clashed with the multiple y axis feature, this feature was orginoally added to mainly colour the y axis but this is achived in the multiple y axis feature much easier so this has been removed now
  - line, bar and overlay charts have a new option called `customYLabel`, this is function that can be used to give a custom display to y labels, here is an example showing the parameters and changing the colour of the label based on the index position (also a fiddle) [http://fiddle.jshell.net/leighking2/jLzvhf4f/](http://fiddle.jshell.net/leighking2/jLzvhf4f/)
  
@@ -87,7 +89,7 @@ This feature has been removed as it clashed with the multiple y axis feature, th
                      ctx.fillStyle = defaultStyle;
               }
 
-Most new features are documented in the forks docs section or follow the links to the fiddles to see a working example.
+
 ## Documentation
 
 You can find documentation at [chartjs.org/docs](http://www.chartjs.org/docs/). The markdown files that build the site are available under `/docs`. Please note - in some of the json examples of configuration you might notice some liquid tags - this is just for the generating the site html, please disregard.

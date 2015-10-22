@@ -9,7 +9,14 @@
  - Line, Bar and OVerlay charts now handle negative values better, just make sure you pass `scaleBeginAtZero: false,` so that the chart does not reset the scale [http://fiddle.jshell.net/leighking2/gvo0u2oy/](http://fiddle.jshell.net/leighking2/gvo0u2oy/)
 
 ##New Features In This Fork
- - labelsFilter to filter x-axis labels based on user provided function [http://jsfiddle.net/leighking2/mea767ss](http://jsfiddle.net/leighking2/mea767ss/)
+ - labelsFilter to filter x-axis labels based on user provided function, the function is provided with the value of the label, the index of the label and the full labels array, to use declare a new option called `labelsFilter` as a function that returns true if the label is to be filtered out or false if the label is not to be filtered out (shown)
+ 
+             labelsFilter: function (value, index, labels) {
+                 //show every 5th label
+                 return (index + 1) % 5 !== 0;
+             } 
+
+ [http://jsfiddle.net/leighking2/mea767ss](http://jsfiddle.net/leighking2/mea767ss/)
  - Template interpolator can be changed from default `<%` `%>` to what ever you want [http://jsfiddle.net/leighking2/d5yq9x32](http://fiddle.jshell.net/leighking2/d5yq9x32/)
  - New chart - overlay chart - for combing both bar and line charts on the same chart [http://jsfiddle.net/leighking2/y58n7m3z](http://fiddle.jshell.net/leighking2/y58n7m3z/)
  - new chart options for pie and dougnut to allow the creation of semi circle (or any size) charts drawn at user defined starting angle [http://jsfiddle.net/leighking2/f62Lghy1](http://fiddle.jshell.net/leighking2/f62Lghy1/)

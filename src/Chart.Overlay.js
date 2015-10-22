@@ -238,6 +238,7 @@
 
             if (this.options.scaleOverride) {
                 helpers.extend(scaleOptions, {
+                    scaleOverride: this.options.scaleOverride,
                     calculateYRange: helpers.noop,
                     steps: this.options.scaleSteps,
                     stepValue: this.options.scaleStepWidth,

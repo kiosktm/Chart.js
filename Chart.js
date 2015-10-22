@@ -1487,7 +1487,6 @@
                 this.yLabels = [];
 
                 var stepDecimalPlaces = getDecimalPlaces(this.stepValue);
-
                 for (var i = 0; i <= this.steps; i++) {
                     this.yLabels.push(template(this.templateString, {
                         value: (this.min + (i * this.stepValue)).toFixed(stepDecimalPlaces)
@@ -1614,6 +1613,11 @@
                     width: this.width,
                     padding: this.padding,
                     font: this.font,
+                    scaleOverride: this.scaleOverride,
+                    steps: this.steps,
+                    stepValue: this.stepValue,
+                    min: this.min,
+                    max: this.max,
                 };
                 each(this.yAxes, function(yAxis) {
                     this._yAxes.push(new Chart.YAxis({
@@ -1635,10 +1639,10 @@
                             yAxis.scaleFontSize ? yAxis.scaleFontSize : this.fontSize,
                             yAxis.scaleFontStyle ? yAxis.scaleFontStyle : this.fontStyle,
                             yAxis.scaleFontFamily ? yAxis.scaleFontFamily : this.fontFamily),
-                        scaleOverride: yAxis.scaleOverride !== undefined ? yaxis.scaleOverride : this.scaleOverride,
-                        steps: yAxis.scaleOverride ? yaxis.scaleSteps : this.scaleSteps,
-                        stepValue: yAxis.scaleOverride ? yaxis.scaleStepWidth : this.stepValue,
-                        min: yAxis.scaleOverride ? yaxis.scaleStartValue : this.min,
+                        scaleOverride: yAxis.scaleOverride !== undefined ? yAxis.scaleOverride : this.scaleOverride,
+                        steps: yAxis.scaleOverride ? yAxis.scaleSteps : this.steps,
+                        stepValue: yAxis.scaleOverride ? yAxis.scaleStepWidth : this.stepValue,
+                        min: yAxis.scaleOverride ? yAxis.scaleStartValue : this.min,
                         max: yAxis.scaleOverride ? yAxis.scaleStartValue + (yAxis.scaleSteps * yAxis.scaleStepWidth) : this.max,
                         display: yAxis.showScale !== undefined ? yAxis.showScale : this.display,
                         width: this.width,
@@ -1799,17 +1803,19 @@
                     yAxes: this.yAxes,
                     positionLeft: this.positionLeft,
                     xLabels: this.xLabels,
+                    scaleOverride: this.scaleOverride,
+                    steps: this.steps,
+                    stepValue: this.stepValue,
+                    min: this.min,
+                    max: this.max,
                 });
 
             },
-            truncateLabel: function(label) {
-                return label.substring(0, this.labelLength);
-            },
+            
             buildYLabels: function() {
                 this.yLabels = [];
 
                 var stepDecimalPlaces = getDecimalPlaces(this.stepValue);
-
                 for (var i = 0; i <= this.steps; i++) {
                     this.yLabels.push(template(this.templateString, {
                         value: (this.min + (i * this.stepValue)).toFixed(stepDecimalPlaces)
@@ -2609,6 +2615,7 @@
 
             if (this.options.scaleOverride) {
                 helpers.extend(scaleOptions, {
+                    scaleOverride: this.options.scaleOverride,
                     calculateYRange: helpers.noop,
                     steps: this.options.scaleSteps,
                     stepValue: this.options.scaleStepWidth,
@@ -3228,9 +3235,9 @@
                 positionLeft: this.options.scalePositionLeft,
                 datasets: this.datasets,
             };
-
             if (this.options.scaleOverride) {
                 helpers.extend(scaleOptions, {
+                    scaleOverride: this.options.scaleOverride,
                     calculateYRange: helpers.noop,
                     steps: this.options.scaleSteps,
                     stepValue: this.options.scaleStepWidth,
@@ -3728,6 +3735,7 @@
 
             if (this.options.scaleOverride) {
                 helpers.extend(scaleOptions, {
+                    scaleOverride: this.options.scaleOverride,
                     calculateYRange: helpers.noop,
                     steps: this.options.scaleSteps,
                     stepValue: this.options.scaleStepWidth,

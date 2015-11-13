@@ -884,6 +884,14 @@
                 canvas.width = this.chart.width = newWidth;
                 canvas.height = this.chart.height = newHeight;
 
+                //if we have a sacle make sure each axis knows about the chnage
+                if(this.scale)
+                {
+                    helpers.each(this.scale.yAxes._yAxes, function(yAxis){
+                        yAxis.width = newWidth;
+                        yAxis.height = newHeight;
+                    });
+                }
                 retinaScale(this.chart);
 
                 if (typeof callback === "function") {

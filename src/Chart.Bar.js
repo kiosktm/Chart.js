@@ -13,6 +13,7 @@
             return false;
         },
 
+
         //Boolean - Whether the scale should start at zero, or an order of magnitude down from the lowest value
         scaleBeginAtZero: true,
 
@@ -24,6 +25,12 @@
 
         //Number - Width of the grid lines
         scaleGridLineWidth: 1,
+
+        //Boolean - Whether to show horizontal lines (except X axis)
+        scaleShowHorizontalLines: true,
+
+        //Boolean - Whether to show vertical lines (except Y axis)
+        scaleShowVerticalLines: true,
 
         //Boolean - If there is a stroke on each bar
         barShowStroke: true,
@@ -41,11 +48,16 @@
         overlayBars: false,
 
         //Number - length of labels being displayed on graph, 0 represents full length
-        labelLength:0,
+        labelLength: 0,
 
         //String - A legend template
-        legendTemplate: "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].fillColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>"
+        legendTemplate: "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].fillColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>",
 
+        //Array - specific yAxis details
+        yAxes: [],
+
+        //Boolean - set default yAxis on the left of chart
+        scalePositionLeft: true,
 
     };
 
@@ -73,19 +85,18 @@
                 calculateBaseWidth: function() {
                     return (this.calculateX(1) - this.calculateX(0)) - (2 * options.barValueSpacing);
                 },
-                calculateBarWidth: function(datasetCount, overlayBars) {
+                calculateBarWidth: function(datasetCount, overlayBars, bar, yAxesGroupCount) {
                     if (overlayBars) {
                         datasetCount = 1;
                     }
                     //The padding between datasets is to the right of each bar, providing that there are more than 1 dataset
                     var baseWidth = this.calculateBaseWidth() - ((datasetCount - 1) * options.barDatasetSpacing);
-
                     return (baseWidth / datasetCount);
                 }
             });
 
             this.datasets = [];
-
+            this.yAxes = data.yAxes;
             //Set up tooltip events on the chart
             if (this.options.showTooltips) {
                 helpers.bindEvents(this, this.options.tooltipEvents, function(evt) {
@@ -95,8 +106,10 @@
                         bar.restore(['fillColor', 'strokeColor']);
                     });
                     helpers.each(activeBars, function(activeBar) {
-                        activeBar.fillColor = activeBar.highlightFill;
-                        activeBar.strokeColor = activeBar.highlightStroke;
+                        if (activeBar) {
+                            activeBar.fillColor = activeBar.highlightFill;
+                            activeBar.strokeColor = activeBar.highlightStroke;
+                        }
                     });
                     this.showTooltip(activeBars);
                 });
@@ -111,13 +124,14 @@
 
             //Iterate through each of the datasets, and build this into a property of the chart
             helpers.each(data.datasets, function(dataset, datasetIndex) {
-
                 var datasetObject = {
                     label: dataset.label || null,
                     fillColor: dataset.fillColor,
                     strokeColor: dataset.strokeColor,
                     showTooltip: dataset.showTooltip,
-                    bars: []
+                    bars: [],
+                    yAxesGroup: dataset.yAxesGroup,
+                    values: dataset.data
                 };
 
                 this.datasets.push(datasetObject);
@@ -133,21 +147,33 @@
                         fillColor: dataset.fillColor,
 
                         highlightFill: dataset.highlightFill || dataset.fillColor,
-                        highlightStroke: dataset.highlightStroke || dataset.strokeColor
+                        highlightStroke: dataset.highlightStroke || dataset.strokeColor,
+                        yAxesGroup: dataset.yAxesGroup,
                     }));
                 }, this);
 
             }, this);
 
             this.buildScale(data.labels);
+            if (this.scale.min < 0) {
 
-            this.BarClass.prototype.base = this.scale.endPoint;
+                var basePercetage = (-1 * parseFloat(this.scale.min) /
+                    (this.scale.max - this.scale.min) * 1.00);
+                var totalHeight = (this.scale.endPoint - this.scale.startPoint);
+                var originFromEnd = basePercetage * totalHeight;
+                var base = this.scale.endPoint - originFromEnd + this.options.scaleGridLineWidth
+
+
+                this.BarClass.prototype.base = base;
+            } else {
+                this.BarClass.prototype.base = this.scale.endPoint;
+            }
 
             this.eachBars(function(bar, index, datasetIndex) {
                 helpers.extend(bar, {
                     width: this.scale.calculateBarWidth(this.datasets.length, this.options.overlayBars),
                     x: this.scale.calculateBarX(this.datasets.length, datasetIndex, index, this.options.overlayBars),
-                    y: this.scale.endPoint
+                    y: bar.base
                 });
                 bar.save();
             }, this);
@@ -181,7 +207,7 @@
 
             for (var datasetIndex = 0; datasetIndex < this.datasets.length; datasetIndex++) {
                 for (barIndex = 0; barIndex < this.datasets[datasetIndex].bars.length; barIndex++) {
-                    if (this.datasets[datasetIndex].bars[barIndex].inRange(eventPosition.x, eventPosition.y) && this.datasets[datasetIndex].bars[barIndex].showTooltip) {
+                    if (this.datasets[datasetIndex].bars[barIndex].inRange(eventPosition.x, eventPosition.y, this.scale.endPoint) && this.datasets[datasetIndex].bars[barIndex].showTooltip) {
                         helpers.each(this.datasets, datasetIterator);
                         return barsArray;
                     }
@@ -202,7 +228,7 @@
             };
 
             var scaleOptions = {
-                labelLength:this.options.labelLength,
+                labelLength: this.options.labelLength,
                 labelsFilter: this.options.labelsFilter,
                 templateString: this.options.scaleLabel,
                 height: this.chart.height,
@@ -215,29 +241,25 @@
                 valuesCount: labels.length,
                 beginAtZero: this.options.scaleBeginAtZero,
                 integersOnly: this.options.scaleIntegersOnly,
-                calculateYRange: function(currentHeight) {
-                    var updatedRanges = helpers.calculateScaleRange(
-                        dataTotal(),
-                        currentHeight,
-                        this.fontSize,
-                        this.beginAtZero,
-                        this.integersOnly
-                    );
-                    helpers.extend(this, updatedRanges);
-                },
                 xLabels: labels,
                 font: helpers.fontString(this.options.scaleFontSize, this.options.scaleFontStyle, this.options.scaleFontFamily),
                 lineWidth: this.options.scaleLineWidth,
                 lineColor: this.options.scaleLineColor,
+                showHorizontalLines: this.options.scaleShowHorizontalLines,
+                showVerticalLines: this.options.scaleShowVerticalLines,
                 gridLineWidth: (this.options.scaleShowGridLines) ? this.options.scaleGridLineWidth : 0,
                 gridLineColor: (this.options.scaleShowGridLines) ? this.options.scaleGridLineColor : "rgba(0,0,0,0)",
                 padding: (this.options.showScale) ? 0 : (this.options.barShowStroke) ? this.options.barStrokeWidth : 0,
                 showLabels: this.options.scaleShowLabels,
-                display: this.options.showScale
+                display: this.options.showScale,
+                yAxes: this.yAxes,
+                positionLeft: this.options.scalePositionLeft,
+                datasets: this.datasets,
             };
 
             if (this.options.scaleOverride) {
                 helpers.extend(scaleOptions, {
+                    scaleOverride: this.options.scaleOverride,
                     calculateYRange: helpers.noop,
                     steps: this.options.scaleSteps,
                     stepValue: this.options.scaleStepWidth,
@@ -260,7 +282,8 @@
                     width: this.scale.calculateBarWidth(this.datasets.length, this.options.overlayBars),
                     base: this.scale.endPoint,
                     strokeColor: this.datasets[datasetIndex].strokeColor,
-                    fillColor: this.datasets[datasetIndex].fillColor
+                    fillColor: this.datasets[datasetIndex].fillColor,
+                    yAxesGroup: this.datasets[datasetIndex].yAxesGroup
                 }));
             }, this);
 
@@ -302,41 +325,49 @@
         },
         //extracted from draw so it can be used to draw any bar datasets
         drawDatasets: function(datasets, easingDecimal) {
-
             if (this.options.overlayBars && datasets[0]) {
 
                 //go through each data set and sort in order of value size
-
                 for (var index = 0; index < datasets[0].bars.length; index++) {
+
+                    //create buckets based on axis group, all axis groups that are overlay get grouped together for drawing
                     var drawBucket = [];
                     for (var datasetIndex = 0; datasetIndex < datasets.length; datasetIndex++) {
-                        var value = datasets[datasetIndex].bars[index].value;
-                        drawBucket.push({
-                            value: value,
-                            index: index,
-                            datasetIndex: datasetIndex
-                        });
+                        if (datasets[datasetIndex].bars[index]) {
+
+                            var value = datasets[datasetIndex].bars[index].value;
+                            drawBucket.push({
+                                value: value,
+                                index: index,
+                                datasetIndex: datasetIndex,
+                                yAxesGroup: datasets[datasetIndex].bars[index].yAxesGroup
+
+                            });
+                        }
                     }
 
-                    while (drawBucket.length > 0 ) {
+                    while (drawBucket.length > 0) {
                         var bucketInfo = this.getLargestValue(drawBucket);
                         var bar = datasets[bucketInfo.datasetIndex].bars[bucketInfo.index];
                         if (bar.hasValue()) {
-                            bar.base = this.scale.endPoint;
+                            if (this.scale.getAxisMin(bar) < 0) {
+                                bar.base = this.scale.getAxisBase(bar);
+                            } else {
+                                bar.base = this.scale.endPoint;
+                            }
                             //Transition then draw
                             bar.transition({
                                 x: this.scale.calculateBarX(datasets.length, datasetIndex, index, this.options.overlayBars),
-                                y: this.scale.calculateY(bar.value),
+                                y: this.scale.calculateY(bar),
                                 width: this.scale.calculateBarWidth(datasets.length, this.options.overlayBars)
                             }, easingDecimal).draw();
                         }
                         var objectIndex = helpers.indexOf(drawBucket, bucketInfo);
                         if (objectIndex === 0) {
-                            if (drawBucket.length === 1)
-                            {
+                            if (drawBucket.length === 1) {
                                 drawBucket = [];
-                            }else{
-                                drawBucket = drawBucket.slice((drawBucket.length * -1) +1);
+                            } else {
+                                drawBucket = drawBucket.slice((drawBucket.length * -1) + 1);
 
                             }
                         } else {
@@ -352,11 +383,15 @@
                 helpers.each(datasets, function(dataset, datasetIndex) {
                     helpers.each(dataset.bars, function(bar, index) {
                         if (bar.hasValue()) {
-                            bar.base = this.scale.endPoint;
+                            if (this.scale.getAxisMin(bar) < 0) {
+                                bar.base = this.scale.getAxisBase(bar);
+                            } else {
+                                bar.base = this.scale.endPoint;
+                            }
                             //Transition then draw
                             bar.transition({
                                 x: this.scale.calculateBarX(datasets.length, datasetIndex, index, this.options.overlayBars),
-                                y: this.scale.calculateY(bar.value),
+                                y: this.scale.calculateY(bar),
                                 width: this.scale.calculateBarWidth(datasets.length, this.options.overlayBars)
                             }, easingDecimal).draw();
                         }
@@ -373,8 +408,16 @@
 
             var ctx = this.chart.ctx;
             this.scale.draw(easingDecimal);
+            helpers.each(this.scale.yAxes._yAxes, function(axisGroup) {
+                var dataSetToSend = [];
+                helpers.each(this.scale.datasets, function(dataset) {
+                    if (dataset.yAxesGroup === axisGroup.name && dataset.bars) {
+                        dataSetToSend.push(dataset);
+                    }
+                });
+                this.drawDatasets(dataSetToSend, easingDecimal);
+            }, this);
 
-            this.drawDatasets(this.datasets, easingDecimal);
 
         }
     });

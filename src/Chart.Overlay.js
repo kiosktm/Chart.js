@@ -20,7 +20,7 @@
             this.lineDatasets = [];
 
             //generate the scale, let bar take control here as he needs the width.
-           this.ScaleClass = Chart.Scale.extend({
+            this.ScaleClass = Chart.Scale.extend({
                 offsetGridLines: true,
                 calculateBarX: function(datasetCount, datasetIndex, barIndex, overlayBars) {
 
@@ -61,11 +61,12 @@
             });
 
             this.datasets = [];
-
+            this.yAxes = data.yAxes;
             //Set up tooltip events on the chart
             if (this.options.showTooltips) {
                 helpers.bindEvents(this, this.options.tooltipEvents, function(evt) {
                     var activeData = (evt.type !== 'mouseout') ? this.getDataAtEvent(evt) : [];
+
                     this.eachBars(function(bar) {
                         bar.restore(['fillColor', 'strokeColor']);
                     });
@@ -73,8 +74,10 @@
                         point.restore(['fillColor', 'strokeColor']);
                     });
                     helpers.each(activeData, function(active) {
-                        active.fillColor = active.highlightFill;
-                        active.strokeColor = active.highlightStroke;
+                        if (active) {
+                            active.fillColor = active.highlightFill;
+                            active.strokeColor = active.highlightStroke;
+                        }
                     });
                     this.showTooltip(activeData);
                 });
@@ -99,7 +102,9 @@
                     pointColor: dataset.pointColor,
                     pointStrokeColor: dataset.pointStrokeColor,
                     showTooltip: dataset.showTooltip,
-                    points: []
+                    points: [],
+                    yAxesGroup: dataset.yAxesGroup,
+                    values: dataset.data
                 };
 
                 this.datasets.push(datasetObject);
@@ -117,7 +122,8 @@
                                 strokeColor: dataset.pointStrokeColor,
                                 fillColor: dataset.pointColor,
                                 highlightFill: dataset.pointHighlightFill || dataset.pointColor,
-                                highlightStroke: dataset.pointHighlightStroke || dataset.pointStrokeColor
+                                highlightStroke: dataset.pointHighlightStroke || dataset.pointStrokeColor,
+                                yAxesGroup: dataset.yAxesGroup,
                             }));
                         }, this);
                         break;
@@ -134,7 +140,8 @@
                                 strokeColor: dataset.strokeColor,
                                 fillColor: dataset.fillColor,
                                 highlightFill: dataset.highlightFill || dataset.fillColor,
-                                highlightStroke: dataset.highlightStroke || dataset.strokeColor
+                                highlightStroke: dataset.highlightStroke || dataset.strokeColor,
+                                yAxesGroup: dataset.yAxesGroup,
                             }));
                         }, this);
 
@@ -146,23 +153,36 @@
 
             this.buildScale(data.labels);
 
+
+
+
+            if (this.scale.min < 0) {
+                var basePercetage = (-1 * parseFloat(this.scale.min) /
+                    (this.scale.max - this.scale.min) * 1.00);
+                var totalHeight = (this.scale.endPoint - this.scale.startPoint);
+                var originFromEnd = basePercetage * totalHeight;
+                var base = this.scale.endPoint - originFromEnd + this.options.scaleGridLineWidth;
+
+                this.BarClass.prototype.base = this.PointClass.prototype.base = base;
+            } else {
+                this.BarClass.prototype.base = this.PointClass.prototype.base = this.scale.endPoint;
+            }
             helpers.each(this.lineDatasets, function(dataset, datasetIndex) {
                 //Iterate through each of the datasets, and build this into a property of the chart
                 this.eachPoints(function(point, index) {
                     helpers.extend(point, {
                         x: this.scale.calculateX(index),
-                        y: this.scale.endPoint
+                        y: point.base
                     });
                     point.save();
                 }, this);
             }, this);
 
-            this.BarClass.prototype.base = this.scale.endPoint;
             this.eachBars(function(bar, index, datasetIndex) {
                 helpers.extend(bar, {
-                    width: this.scale.calculateBarWidth(this.barDatasets.length,this.options.overlayBars),
-                    x: this.scale.calculateBarX(this.barDatasets.length, datasetIndex, index,this.options.overlayBars),
-                    y: this.scale.endPoint
+                    width: this.scale.calculateBarWidth(this.barDatasets.length, this.options.overlayBars),
+                    x: this.scale.calculateBarX(this.barDatasets.length, datasetIndex, index, this.options.overlayBars),
+                    y: bar.base
                 });
                 bar.save();
             }, this);
@@ -186,9 +206,8 @@
                 });
                 return values;
             };
-
             var scaleOptions = {
-                labelLength:this.options.labelLength,
+                labelLength: this.options.labelLength,
                 labelsFilter: this.options.labelsFilter,
                 templateString: this.options.scaleLabel,
                 height: this.chart.height,
@@ -201,29 +220,25 @@
                 valuesCount: labels.length,
                 beginAtZero: this.options.scaleBeginAtZero,
                 integersOnly: this.options.scaleIntegersOnly,
-                calculateYRange: function(currentHeight) {
-                    var updatedRanges = helpers.calculateScaleRange(
-                        dataTotal(),
-                        currentHeight,
-                        this.fontSize,
-                        this.beginAtZero,
-                        this.integersOnly
-                    );
-                    helpers.extend(this, updatedRanges);
-                },
                 xLabels: labels,
                 font: helpers.fontString(this.options.scaleFontSize, this.options.scaleFontStyle, this.options.scaleFontFamily),
                 lineWidth: this.options.scaleLineWidth,
                 lineColor: this.options.scaleLineColor,
                 gridLineWidth: (this.options.scaleShowGridLines) ? this.options.scaleGridLineWidth : 0,
                 gridLineColor: (this.options.scaleShowGridLines) ? this.options.scaleGridLineColor : "rgba(0,0,0,0)",
+                showHorizontalLines: this.options.scaleShowHorizontalLines,
+                showVerticalLines: this.options.scaleShowVerticalLines,
                 padding: (this.options.showScale) ? 0 : (this.options.barShowStroke) ? this.options.barStrokeWidth : 0,
                 showLabels: this.options.scaleShowLabels,
-                display: this.options.showScale
+                display: this.options.showScale,
+                yAxes: this.yAxes,
+                positionLeft: this.options.scalePositionLeft,
+                datasets: this.datasets,
             };
 
             if (this.options.scaleOverride) {
                 helpers.extend(scaleOptions, {
+                    scaleOverride: this.options.scaleOverride,
                     calculateYRange: helpers.noop,
                     steps: this.options.scaleSteps,
                     stepValue: this.options.scaleStepWidth,
@@ -284,10 +299,9 @@
                     barsArray.push(dataset.bars[barIndex]);
                 },
                 barIndex;
-
             for (var datasetIndex = 0; datasetIndex < this.barDatasets.length; datasetIndex++) {
                 for (barIndex = 0; barIndex < this.barDatasets[datasetIndex].bars.length; barIndex++) {
-                    if (this.barDatasets[datasetIndex].bars[barIndex].inRange(eventPosition.x, eventPosition.y) && this.barDatasets[datasetIndex].bars[barIndex].showTooltip) {
+                    if (this.barDatasets[datasetIndex].bars[barIndex].inRange(eventPosition.x, eventPosition.y, this.scale.endPoint) && this.barDatasets[datasetIndex].bars[barIndex].showTooltip) {
                         helpers.each(this.barDatasets, datasetIterator);
                         return barsArray;
                     }
@@ -310,8 +324,10 @@
                             label: label,
                             x: this.scale.calculateX(this.scale.valuesCount + 1),
                             y: this.scale.endPoint,
+                            base: this.scale.endPoint,
                             strokeColor: this.lineDatasets[lineDataSetIndex].pointStrokeColor,
-                            fillColor: this.lineDatasets[lineDataSetIndex].pointColor
+                            fillColor: this.lineDatasets[lineDataSetIndex].pointColor,
+                            yAxesGroup: this.datasets[datasetIndex].yAxesGroup
                         }));
                         lineDataSetIndex++;
                         break;
@@ -326,7 +342,8 @@
                             width: this.scale.calculateBarWidth(this.barDatasets.length),
                             base: this.scale.endPoint,
                             strokeColor: this.barDatasets[barDataSetIndex].strokeColor,
-                            fillColor: this.barDatasets[barDataSetIndex].fillColor
+                            fillColor: this.barDatasets[barDataSetIndex].fillColor,
+                            yAxesGroup: this.datasets[datasetIndex].yAxesGroup
                         }));
                         barDataSetIndex++;
                         break;
@@ -351,6 +368,10 @@
         },
         reflow: function() {
             helpers.extend(this.BarClass.prototype, {
+                y: this.scale.endPoint,
+                base: this.scale.endPoint
+            });
+            helpers.extend(this.PointClass.prototype, {
                 y: this.scale.endPoint,
                 base: this.scale.endPoint
             });
@@ -394,6 +415,9 @@
                 this.activeElements = ChartElements;
             }
             this.draw();
+            if (this.options.customTooltips) {
+                this.options.customTooltips(false);
+            }
             if (ChartElements.length > 0) {
                 // If we have multiple datasets, show a MultiTooltip for all of the data points at that index
                 if (this.datasets && this.datasets.length > 1) {
@@ -407,7 +431,7 @@
                             break;
                         }
                     }
-                    if (dataIndex === -1) {
+                    if (dataIndex === -1 || dataIndex === undefined) {
                         for (i = this.barDatasets.length - 1; i >= 0; i--) {
                             dataArray = this.barDatasets[i].bars;
                             dataIndex = helpers.indexOf(dataArray, ChartElements[0]);
@@ -441,7 +465,6 @@
                                     Elements.push(dataCollection[dataIndex]);
                                 }
                             });
-
                             helpers.each(Elements, function(element) {
                                 xPositions.push(element.x);
                                 yPositions.push(element.y);
@@ -489,7 +512,8 @@
                         legendColorBackground: this.options.multiTooltipKeyBackground,
                         title: ChartElements[0].label,
                         chart: this.chart,
-                        ctx: this.chart.ctx
+                        ctx: this.chart.ctx,
+                        custom: this.options.customTooltips
                     }).draw();
 
                 } else {
@@ -508,7 +532,8 @@
                             caretHeight: this.options.tooltipCaretSize,
                             cornerRadius: this.options.tooltipCornerRadius,
                             text: helpers.template(this.options.tooltipTemplate, Element),
-                            chart: this.chart
+                            chart: this.chart,
+                            custom: this.options.customTooltips
                         }).draw();
                     }, this);
                 }
